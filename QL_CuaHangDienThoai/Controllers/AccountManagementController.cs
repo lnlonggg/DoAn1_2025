@@ -196,7 +196,7 @@ namespace QL_CuaHangDienThoai.Controllers
                         _context.Update(taiKhoan.QuanTriVien);
                     }
 
-                    _context.Update(taiKhoan);  // ← Cập nhật TaiKhoan (bao gồm Email)
+                    _context.Update(taiKhoan); 
                     await _context.SaveChangesAsync();
                     await transaction.CommitAsync();
 

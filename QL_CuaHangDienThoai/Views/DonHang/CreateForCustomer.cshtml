@@ -1,0 +1,253 @@
+﻿@{
+    ViewData["Title"] = "Tạo đơn hàng cho khách";
+    var khachHangs = ViewBag.KhachHangs as IEnumerable<QL_CuaHangDienThoai.Models.KhachHang>;
+    var sanPhams = ViewBag.SanPhams as IEnumerable<QL_CuaHangDienThoai.Models.DienThoai>;
+}
+
+<div class="row mb-4">
+    <div class="col-12">
+        <h2>👨‍💼 Tạo đơn hàng cho khách hàng</h2>
+        <p class="text-muted">Nhân viên tạo đơn hàng trực tiếp cho khách hàng</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">📋 Thông tin đơn hàng</h5>
+            </div>
+            <div class="card-body">
+                <form asp-action="CreateForCustomer" method="post">
+                    <div asp-validation-summary="All" class="alert alert-danger"></div>
+
+                    <!-- Chọn khách hàng -->
+                    <div class="mb-4">
+                        <label class="form-label"><strong>Chọn khách hàng *</strong></label>
+                        <select name="maKH" class="form-select" required onchange="updateCustomerInfo()">
+                            <option value="">-- Chọn khách hàng --</option>
+                            @if (khachHangs != null)
+                            {
+                                @foreach (var kh in khachHangs)
+                                {
+                                    <option value="@kh.MaKH"
+                                            data-name="@kh.HoTen"
+                                            data-phone="@kh.SoDT"
+                                            data-email="@kh.Email">
+                                        @kh.MaKH - @kh.HoTen (@kh.SoDT)
+                                    </option>
+                                }
+                            }
+                        </select>
+
+                        <!-- Thông tin khách hàng được chọn -->
+                        <div id="customer-info" class="mt-2 p-3 bg-light rounded" style="display: none;">
+                            <h6>👤 Thông tin khách hàng:</h6>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <strong>Họ tên:</strong> <span id="customer-name"></span>
+                                </div>
+                                <div class="col-md-4">
+                                    <strong>Điện thoại:</strong> <span id="customer-phone"></span>
+                                </div>
+                                <div class="col-md-4">
+                                    <strong>Email:</strong> <span id="customer-email"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chọn sản phẩm -->
+                    <div class="mb-4">
+                        <label class="form-label"><strong>Chọn sản phẩm *</strong></label>
+                        <select name="maDT" class="form-select" required onchange="updateProductInfo()">
+                            <option value="">-- Chọn sản phẩm --</option>
+                            @if (sanPhams != null)
+                            {
+                                @foreach (var sp in sanPhams)
+                                {
+                                    <option value="@sp.MaDT"
+                                            data-name="@sp.TenDT"
+                                            data-price="@sp.DonGia"
+                                            data-stock="@sp.SoLuongTon">
+                                        @sp.MaDT - @sp.TenDT (@sp.DonGia.ToString("C0")) - Còn: @sp.SoLuongTon
+                                    </option>
+                                }
+                            }
+                        </select>
+
+                        <!-- Thông tin sản phẩm được chọn -->
+                        <div id="product-info" class="mt-2 p-3 bg-light rounded" style="display: none;">
+                            <h6>📱 Thông tin sản phẩm:</h6>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <strong>Tên:</strong> <span id="product-name"></span>
+                                </div>
+                                <div class="col-md-4">
+                                    <strong>Đơn giá:</strong> <span id="product-price"></span>
+                                </div>
+                                <div class="col-md-4">
+                                    <strong>Tồn kho:</strong> <span id="product-stock"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Số lượng -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><strong>Số lượng *</strong></label>
+                            <div class="input-group">
+                                <button class="btn btn-outline-secondary" type="button" onclick="decreaseQty()">-</button>
+                                <input type="number" name="soLuong" id="quantity" class="form-control text-center"
+                                       value="1" min="1" max="999" required onchange="updateTotal()" />
+                                <button class="btn btn-outline-secondary" type="button" onclick="increaseQty()">+</button>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label"><strong>Thành tiền</strong></label>
+                            <div class="form-control bg-light">
+                                <strong id="total-amount" class="text-success">0 ₫</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ghi chú -->
+                    <div class="mb-4">
+                        <label class="form-label">Ghi chú</label>
+                        <textarea name="ghiChu" class="form-control" rows="3"
+                                  placeholder="Ghi chú về đơn hàng (nếu có)..."></textarea>
+                    </div>
+
+                    <!-- Submit buttons -->
+                    <div class="d-flex justify-content-between">
+                        <a asp-action="Index" class="btn btn-secondary">
+                            ⬅️ Quay lại
+                        </a>
+                        <button type="submit" class="btn btn-success btn-lg">
+                            💾 Tạo đơn hàng
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help card -->
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h6 class="mb-0">💡 Hướng dẫn</h6>
+            </div>
+            <div class="card-body">
+                <ol class="mb-3">
+                    <li>Chọn khách hàng từ danh sách</li>
+                    <li>Chọn sản phẩm cần bán</li>
+                    <li>Nhập số lượng</li>
+                    <li>Thêm ghi chú nếu cần</li>
+                    <li>Tạo đơn hàng</li>
+                </ol>
+
+                <div class="alert alert-warning">
+                    <small>
+                        <strong>Lưu ý:</strong> Đơn hàng được tạo sẽ có trạng thái "Hoàn thành"
+                        và được gán với mã nhân viên của bạn.
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <!-- Summary card -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <h6 class="mb-0">📊 Tóm tắt</h6>
+            </div>
+            <div class="card-body">
+                <p><strong>Nhân viên:</strong> @User.Identity.Name</p>
+                <p><strong>Ngày tạo:</strong> @DateTime.Now.ToString("dd/MM/yyyy HH:mm")</p>
+                <p><strong>Loại đơn:</strong> Tại cửa hàng (COD)</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let currentPrice = 0;
+        let maxStock = 0;
+
+        function updateCustomerInfo() {
+            const select = document.querySelector('select[name="maKH"]');
+            const option = select.selectedOptions[0];
+            const infoDiv = document.getElementById('customer-info');
+
+            if (option && option.value) {
+                document.getElementById('customer-name').textContent = option.dataset.name;
+                document.getElementById('customer-phone').textContent = option.dataset.phone;
+                document.getElementById('customer-email').textContent = option.dataset.email || 'Chưa có';
+                infoDiv.style.display = 'block';
+            } else {
+                infoDiv.style.display = 'none';
+            }
+        }
+
+        function updateProductInfo() {
+            const select = document.querySelector('select[name="maDT"]');
+            const option = select.selectedOptions[0];
+            const infoDiv = document.getElementById('product-info');
+            const quantityInput = document.getElementById('quantity');
+
+            if (option && option.value) {
+                currentPrice = parseFloat(option.dataset.price);
+                maxStock = parseInt(option.dataset.stock);
+
+                document.getElementById('product-name').textContent = option.dataset.name;
+                document.getElementById('product-price').textContent = currentPrice.toLocaleString('vi-VN', {
+                    style: 'currency',
+                    currency: 'VND'
+                });
+                document.getElementById('product-stock').textContent = maxStock + ' sản phẩm';
+
+                quantityInput.max = maxStock;
+                if (parseInt(quantityInput.value) > maxStock) {
+                    quantityInput.value = maxStock;
+                }
+
+                infoDiv.style.display = 'block';
+                updateTotal();
+            } else {
+                infoDiv.style.display = 'none';
+                currentPrice = 0;
+                maxStock = 0;
+                updateTotal();
+            }
+        }
+
+        function updateTotal() {
+            const quantity = parseInt(document.getElementById('quantity').value) || 0;
+            const total = quantity * currentPrice;
+            document.getElementById('total-amount').textContent = total.toLocaleString('vi-VN', {
+                style: 'currency',
+                currency: 'VND'
+            });
+        }
+
+        function increaseQty() {
+            const input = document.getElementById('quantity');
+            const current = parseInt(input.value);
+            if (current < maxStock) {
+                input.value = current + 1;
+                updateTotal();
+            }
+        }
+
+        function decreaseQty() {
+            const input = document.getElementById('quantity');
+            const current = parseInt(input.value);
+            if (current > 1) {
+                input.value = current - 1;
+                updateTotal();
+            }
+        }
+    </script>
+}

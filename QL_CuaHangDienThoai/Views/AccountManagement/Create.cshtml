@@ -1,0 +1,201 @@
+﻿@model QL_CuaHangDienThoai.ViewModels.CreateAccountViewModel
+@{
+    ViewData["Title"] = "Tạo tài khoản mới";
+}
+
+<div class="row mb-4">
+    <div class="col-12">
+        <h2>➕ Tạo tài khoản mới</h2>
+        <p class="text-muted">Thêm người dùng mới vào hệ thống</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="mb-0">📝 Thông tin tài khoản</h5>
+            </div>
+            <div class="card-body">
+                <form asp-action="Create" method="post">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                    <!-- Thông tin đăng nhập -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h6 class="mb-0">🔐 Thông tin đăng nhập</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="TenDangNhap" class="form-label"></label>
+                                    <input asp-for="TenDangNhap" class="form-control" placeholder="Nhập tên đăng nhập" />
+                                    <span asp-validation-for="TenDangNhap" class="text-danger"></span>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="MatKhau" class="form-label"></label>
+                                    <div class="input-group">
+                                        <input asp-for="MatKhau" type="password" class="form-control" placeholder="Nhập mật khẩu" />
+                                        <button class="btn btn-outline-secondary" type="button" onclick="togglePassword()">
+                                            👁️
+                                        </button>
+                                    </div>
+                                    <span asp-validation-for="MatKhau" class="text-danger"></span>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="VaiTro" class="form-label"></label>
+                                <select asp-for="VaiTro" class="form-select" onchange="updateRoleInfo()">
+                                    <option value="">-- Chọn vai trò --</option>
+                                    <option value="admin">👑 Admin - Toàn quyền hệ thống</option>
+                                    <option value="nhanvien">👨‍💼 Nhân viên - Quản lý sản phẩm và đơn hàng</option>
+                                    <option value="khach">👤 Khách hàng - Mua sắm trực tuyến</option>
+                                </select>
+                                <span asp-validation-for="VaiTro" class="text-danger"></span>
+
+                                <!-- Thông tin vai trò -->
+                                <div id="role-info" class="mt-2" style="display: none;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Thông tin cá nhân -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h6 class="mb-0">👤 Thông tin cá nhân</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-12 mb-3">
+                                    <label asp-for="HoTen" class="form-label"></label>
+                                    <input asp-for="HoTen" class="form-control" placeholder="Nhập họ và tên đầy đủ" />
+                                    <span asp-validation-for="HoTen" class="text-danger"></span>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="SoDienThoai" class="form-label"></label>
+                                    <input asp-for="SoDienThoai" class="form-control" placeholder="0xxxxxxxxx" />
+                                    <span asp-validation-for="SoDienThoai" class="text-danger"></span>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="Email" class="form-label"></label>
+                                    <input asp-for="Email" type="email" class="form-control" placeholder="email@example.com" />
+                                    <span asp-validation-for="Email" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit buttons -->
+                    <div class="d-flex justify-content-between">
+                        <a asp-action="Index" class="btn btn-secondary">
+                            ⬅️ Quay lại
+                        </a>
+                        <button type="submit" class="btn btn-success btn-lg">
+                            💾 Tạo tài khoản
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help sidebar -->
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h6 class="mb-0">💡 Hướng dẫn</h6>
+            </div>
+            <div class="card-body">
+                <h6>Vai trò trong hệ thống:</h6>
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <strong>👑 Admin:</strong>
+                        <ul>
+                            <li>Toàn quyền hệ thống</li>
+                            <li>Quản lý tài khoản</li>
+                            <li>Xem báo cáo</li>
+                        </ul>
+                    </li>
+                    <li class="mb-2">
+                        <strong>👨‍💼 Nhân viên:</strong>
+                        <ul>
+                            <li>Quản lý sản phẩm</li>
+                            <li>Xử lý đơn hàng</li>
+                            <li>Xác nhận thanh toán</li>
+                        </ul>
+                    </li>
+                    <li class="mb-2">
+                        <strong>👤 Khách hàng:</strong>
+                        <ul>
+                            <li>Mua sắm trực tuyến</li>
+                            <li>Quản lý đơn hàng</li>
+                            <li>Theo dõi giao hàng</li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header">
+                <h6 class="mb-0">⚠️ Lưu ý bảo mật</h6>
+            </div>
+            <div class="card-body">
+                <ul class="small mb-0">
+                    <li>Mật khẩu ít nhất 6 ký tự</li>
+                    <li>Tên đăng nhập phải duy nhất</li>
+                    <li>Kiểm tra thông tin trước khi tạo</li>
+                    <li>Thông báo cho người dùng sau khi tạo</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        function togglePassword() {
+            const passwordInput = document.querySelector('input[name="MatKhau"]');
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+        }
+
+        function updateRoleInfo() {
+            const select = document.querySelector('select[name="VaiTro"]');
+            const infoDiv = document.getElementById('role-info');
+            const value = select.value;
+
+            if (value) {
+                let info = '';
+                switch(value) {
+                    case 'admin':
+                        info = '<div class="alert alert-warning"><small><strong>Quyền Admin:</strong> Có thể truy cập tất cả chức năng, bao gồm quản lý tài khoản và xem báo cáo.</small></div>';
+                        break;
+                    case 'nhanvien':
+                        info = '<div class="alert alert-info"><small><strong>Quyền Nhân viên:</strong> Có thể quản lý sản phẩm, đơn hàng, xác nhận thanh toán. Không thể quản lý tài khoản.</small></div>';
+                        break;
+                    case 'khach':
+                        info = '<div class="alert alert-success"><small><strong>Quyền Khách hàng:</strong> Chỉ có thể mua sắm, xem đơn hàng của mình. Không truy cập được trang quản trị.</small></div>';
+                        break;
+                }
+                infoDiv.innerHTML = info;
+                infoDiv.style.display = 'block';
+            } else {
+                infoDiv.style.display = 'none';
+            }
+        }
+
+        // Auto format phone number
+        document.querySelector('input[name="SoDienThoai"]').addEventListener('input', function() {
+            this.value = this.value.replace(/\D/g, '');
+            if (this.value.length > 10) {
+                this.value = this.value.substring(0, 10);
+            }
+        });
+    </script>
+}

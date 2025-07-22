@@ -1,0 +1,325 @@
+﻿@model IEnumerable<QL_CuaHangDienThoai.Models.TaiKhoan>
+@{
+    ViewData["Title"] = "Quản lý tài khoản";
+}
+
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h2>👥 Quản lý tài khoản hệ thống</h2>
+        <p class="text-muted">Tạo, chỉnh sửa và phân quyền tài khoản người dùng</p>
+    </div>
+    <div class="col-md-4 text-end">
+        <a asp-action="Create" class="btn btn-success">
+            ➕ Tạo tài khoản mới
+        </a>
+    </div>
+</div>
+
+<!-- Thống kê nhanh -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card bg-primary text-white">
+            <div class="card-body text-center">
+                <h5>@Model.Count(t => t.VaiTro == "admin")</h5>
+                <small>👑 Admin</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-warning text-dark">
+            <div class="card-body text-center">
+                <h5>@Model.Count(t => t.VaiTro == "nhanvien")</h5>
+                <small>👨‍💼 Nhân viên</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-info text-white">
+            <div class="card-body text-center">
+                <h5>@Model.Count(t => t.VaiTro == "khach")</h5>
+                <small>👤 Khách hàng</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card bg-success text-white">
+            <div class="card-body text-center">
+                <h5>@Model.Count()</h5>
+                <small>📊 Tổng tài khoản</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bộ lọc -->
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-4">
+                <label class="form-label">Lọc theo vai trò:</label>
+                <select id="roleFilter" class="form-select">
+                    <option value="">Tất cả vai trò</option>
+                    <option value="admin">👑 Admin</option>
+                    <option value="nhanvien">👨‍💼 Nhân viên</option>
+                    <option value="khach">👤 Khách hàng</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Tìm kiếm:</label>
+                <input type="text" id="searchInput" class="form-control" placeholder="Tên đăng nhập, họ tên..." />
+            </div>
+            <div class="col-md-4 d-flex align-items-end">
+                <button class="btn btn-outline-secondary" onclick="clearFilters()">
+                    🔄 Xóa bộ lọc
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Danh sách tài khoản -->
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover" id="accountsTable">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Tên đăng nhập</th>
+                        <th>Họ tên</th>
+                        <th>Vai trò</th>
+                        <th>Liên hệ</th>
+                        <th>Trạng thái</th>
+                        <th class="text-center">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var account in Model)
+                    {
+                        <tr data-role="@account.VaiTro" data-username="@account.TenDangNhap">
+                            <td>
+                                <strong>@account.TenDangNhap</strong>
+                                @if (account.TenDangNhap == User.Identity.Name)
+                                {
+                                    <span class="badge bg-success ms-2">Bạn</span>
+                                }
+                            </td>
+                            <td>
+                                @if (account.VaiTro == "khach")
+                                {
+                                    <div>
+                                        <strong>@account.KhachHang?.HoTen</strong><br>
+                                        <small class="text-muted">@account.KhachHang?.MaKH</small>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div>
+                                        <strong>@account.QuanTriVien?.HoTen</strong><br>
+                                        <small class="text-muted">@account.QuanTriVien?.MaQTV</small>
+                                    </div>
+                                }
+                            </td>
+                            <td>
+                                <select class="form-select form-select-sm role-select"
+                                        data-username="@account.TenDangNhap"
+                                        @(account.TenDangNhap == User.Identity.Name ? "disabled" : "")>
+
+                                    @if (account.VaiTro == "admin")
+                                    {
+                                        <option value="admin" selected>👑 Admin</option>
+                                        <option value="nhanvien">👨‍💼 Nhân viên</option>
+                                        <option value="khach">👤 Khách hàng</option>
+                                    }
+                                    else if (account.VaiTro == "nhanvien")
+                                    {
+                                        <option value="admin">👑 Admin</option>
+                                        <option value="nhanvien" selected>👨‍💼 Nhân viên</option>
+                                        <option value="khach">👤 Khách hàng</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="admin">👑 Admin</option>
+                                        <option value="nhanvien">👨‍💼 Nhân viên</option>
+                                        <option value="khach" selected>👤 Khách hàng</option>
+                                    }
+                                </select>
+                            </td>
+                            <td>
+                                @if (account.VaiTro == "khach")
+                                {
+                                    <div>
+                                        <small>📱 @account.KhachHang?.SoDT</small><br>
+                                        <small>📧 @account.KhachHang?.Email</small>
+                                    </div>
+                                }
+                                else
+                                {
+                                    <div>
+                                        <small>📱 @account.QuanTriVien?.SoDT</small><br>
+                                        <small>📧 @account.QuanTriVien?.Email</small>
+                                    </div>
+                                }
+                            </td>
+                            <td>
+                                <span class="badge bg-success">✅ Hoạt động</span>
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group">
+                                    <a asp-action="Edit" asp-route-id="@account.TenDangNhap" 
+                                       class="btn btn-sm btn-outline-primary">
+                                        ✏️ Sửa
+                                    </a>
+                                    @if (account.TenDangNhap != User.Identity.Name)
+                                    {
+                                        <button class="btn btn-sm btn-outline-danger" 
+                                                onclick="deleteAccount('@account.TenDangNhap')">
+                                            🗑️ Xóa
+                                        </button>
+                                    }
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Bộ lọc theo vai trò
+            $('#roleFilter').on('change', function() {
+                const selectedRole = $(this).val();
+                const rows = $('#accountsTable tbody tr');
+                
+                if (selectedRole === '') {
+                    rows.show();
+                } else {
+                    rows.hide();
+                    rows.filter(`[data-role="${selectedRole}"]`).show();
+                }
+            });
+
+            // Tìm kiếm
+            $('#searchInput').on('keyup', function() {
+                const searchTerm = $(this).val().toLowerCase();
+                const rows = $('#accountsTable tbody tr');
+                
+                rows.each(function() {
+                    const rowText = $(this).text().toLowerCase();
+                    if (rowText.includes(searchTerm)) {
+                        $(this).show();
+                    } else {
+                        $(this).hide();
+                    }
+                });
+            });
+
+            // Thay đổi vai trò
+            $('.role-select').on('change', function() {
+                const username = $(this).data('username');
+                const newRole = $(this).val();
+                const originalRole = $(this).closest('tr').data('role');
+                
+                console.log(`Role change: ${username} from ${originalRole} to ${newRole}`);
+                
+                if (confirm(`Thay đổi vai trò tài khoản "${username}" thành "${newRole}"?`)) {
+                    changeRole(username, newRole, $(this));
+                } else {
+                    $(this).val(originalRole);
+                }
+            });
+        });
+
+        function changeRole(username, newRole, selectElement) {
+            console.log(`=== CHANGE ROLE DEBUG ===`);
+            console.log(`Username: ${username}`);
+            console.log(`New Role: ${newRole}`);
+            
+            $.post('/AccountManagement/ChangeRole', {
+                username: username,
+                newRole: newRole
+            })
+            .done(function(response) {
+                console.log('✅ Response received:', response);
+                if (response.success) {
+                    showToast(response.message, 'success');
+                    selectElement.closest('tr').attr('data-role', newRole);
+                } else {
+                    showToast(response.message, 'error');
+                    selectElement.val(selectElement.closest('tr').data('role'));
+                }
+            })
+            .fail(function(xhr, status, error) {
+                console.log('❌ AJAX Failed:');
+                console.log('Status:', status);
+                console.log('Error:', error);
+                console.log('Response Text:', xhr.responseText);
+                showToast('Có lỗi xảy ra khi thay đổi vai trò.', 'error');
+                selectElement.val(selectElement.closest('tr').data('role'));
+            });
+        }
+
+        function deleteAccount(username) {
+            if (confirm(`Bạn có chắc chắn muốn xóa tài khoản "${username}"?\nHành động này không thể hoàn tác!`)) {
+                $.post('/AccountManagement/Delete', { username: username })
+                .done(function(response) {
+                    if (response.success) {
+                        showToast(response.message, 'success');
+                        $(`tr[data-username="${username}"]`).fadeOut(500, function() {
+                            $(this).remove();
+                        });
+                    } else {
+                        showToast(response.message, 'error');
+                    }
+                })
+                .fail(function() {
+                    showToast('Có lỗi xảy ra khi xóa tài khoản.', 'error');
+                });
+            }
+        }
+
+        function clearFilters() {
+            $('#roleFilter').val('');
+            $('#searchInput').val('');
+            $('#accountsTable tbody tr').show();
+        }
+
+        function showToast(message, type) {
+            const toast = $(`
+                <div class="toast align-items-center text-bg-${type === 'success' ? 'success' : 'danger'} border-0" role="alert">
+                    <div class="d-flex">
+                        <div class="toast-body">${message}</div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                    </div>
+                </div>
+            `);
+            
+            if ($('#toast-container').length === 0) {
+                $('body').append('<div id="toast-container" class="toast-container position-fixed bottom-0 end-0 p-3"></div>');
+            }
+            
+            $('#toast-container').append(toast);
+            var bsToast = new bootstrap.Toast(toast[0]);
+            bsToast.show();
+        }
+    </script>
+}
+
+<style>
+    .role-select {
+        border: none;
+        background: transparent;
+        font-weight: bold;
+    }
+    
+    .role-select:focus {
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+    
+    .table-hover tbody tr:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+</style>

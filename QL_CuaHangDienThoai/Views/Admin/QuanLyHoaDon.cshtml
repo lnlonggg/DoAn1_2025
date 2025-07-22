@@ -104,6 +104,19 @@
                                 <strong class="text-success">@order.TongTien.ToString("C0")</strong>
                             </td>
                             <td class="text-center">
+                                @if (order.QuanTriVien != null)
+                                {
+                                    <span class="badge bg-info">@order.QuanTriVien.MaQTV</span>
+                            
+                                    <br>
+                                    <small>@order.QuanTriVien.HoTen</small>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">Chưa xử lý</span>
+                                }
+                            </td>
+                            <td class="text-center">
                                 <span class="badge bg-success">✅ Hoàn thành</span>
                             </td>
                             <td class="text-center">

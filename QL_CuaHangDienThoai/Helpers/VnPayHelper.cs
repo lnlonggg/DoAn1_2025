@@ -11,8 +11,8 @@ namespace QL_CuaHangDienThoai.Helpers
 
         public VnPayHelper(IConfiguration configuration)
         {
-            _tmnCode = configuration["VnPay:TmnCode"] ?? "DEMOSHOP";
-            _hashSecret = configuration["VnPay:HashSecret"] ?? "DEMOSECRETKEY123456";
+            _tmnCode = configuration["VnPay:TmnCode"] ?? "0ZE53AQG";
+            _hashSecret = configuration["VnPay:HashSecret"] ?? "U89C105M6Q347VMKQOUW0JSGDXIVO8BA";
             _baseUrl = configuration["VnPay:BaseUrl"] ?? "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
         }
 
@@ -31,17 +31,33 @@ namespace QL_CuaHangDienThoai.Helpers
                 {"vnp_OrderInfo", orderInfo},
                 {"vnp_OrderType", "other"},
                 {"vnp_ReturnUrl", returnUrl},
-                {"vnp_TxnRef", orderId}
+                {"vnp_TxnRef", orderId},
+                {"vnp_SecureHashType", "HMACSHA512"}
             };
 
-            // Sắp xếp và tạo query string
+            //// Sắp xếp và tạo query string
+            //var sortedParams = requestData.OrderBy(x => x.Key);
+            //var queryString = string.Join("&", sortedParams.Select(x => $"{x.Key}={Uri.EscapeDataString(x.Value)}"));
+
+            //// Tạo secure hash
+            //var secureHash = CreateSecureHash(queryString);
+
+            //return $"{_baseUrl}?{queryString}&vnp_SecureHash={secureHash}";
+            
+            
             var sortedParams = requestData.OrderBy(x => x.Key);
+
+            // Chuỗi để hash (KHÔNG escape)
+            var hashString = string.Join("&", sortedParams.Select(x => $"{x.Key}={Uri.EscapeDataString(x.Value)}"));
+
+
+            // Chuỗi để gửi lên URL (CÓ escape)
             var queryString = string.Join("&", sortedParams.Select(x => $"{x.Key}={Uri.EscapeDataString(x.Value)}"));
 
-            // Tạo secure hash
-            var secureHash = CreateSecureHash(queryString);
+            var secureHash = CreateSecureHash(hashString);
 
             return $"{_baseUrl}?{queryString}&vnp_SecureHash={secureHash}";
+           
         }
 
         public VnPayResponse ProcessCallback(IQueryCollection queryCollection)
@@ -57,7 +73,8 @@ namespace QL_CuaHangDienThoai.Helpers
 
                 // Sắp xếp và tạo hash string
                 var sortedParams = responseData.OrderBy(x => x.Key);
-                var hashString = string.Join("&", sortedParams.Select(x => $"{x.Key}={x.Value}"));
+                //var hashString = string.Join("&", sortedParams.Select(x => $"{x.Key}={x.Value}"));
+                var hashString = string.Join("&", sortedParams.Select(x => $"{x.Key}={Uri.EscapeDataString(x.Value)}"));
 
                 // Tạo secure hash để so sánh
                 var calculatedHash = CreateSecureHash(hashString);

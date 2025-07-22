@@ -1,0 +1,250 @@
+﻿@model QL_CuaHangDienThoai.ViewModels.EditAccountViewModel
+@{
+    ViewData["Title"] = "Chỉnh sửa tài khoản";
+}
+
+<div class="row mb-4">
+    <div class="col-12">
+        <h2>✏️ Chỉnh sửa tài khoản: @Model.TenDangNhap</h2>
+        <p class="text-muted">Cập nhật thông tin tài khoản người dùng</p>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header bg-warning text-dark">
+                <h5 class="mb-0">📝 Thông tin tài khoản</h5>
+            </div>
+            <div class="card-body">
+                <form asp-action="Edit" method="post">
+                    <input asp-for="TenDangNhap" type="hidden" />
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                    <!-- Thông tin cơ bản -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h6 class="mb-0">🔐 Thông tin đăng nhập</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Tên đăng nhập</label>
+                                    <input type="text" class="form-control bg-light" value="@Model.TenDangNhap" readonly />
+                                    <small class="text-muted">Không thể thay đổi tên đăng nhập</small>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Vai trò hiện tại</label>
+                                    <div class="form-control bg-light">
+                                        @switch (Model.VaiTro)
+                                        {
+                                            case "admin":
+                                                <span class="badge bg-primary">👑 Admin</span>
+                                                break;
+                                            case "nhanvien":
+                                                <span class="badge bg-warning">👨‍💼 Nhân viên</span>
+                                                break;
+                                            case "khach":
+                                                <span class="badge bg-info">👤 Khách hàng</span>
+                                                break;
+                                        }
+                                    </div>
+                                    <small class="text-muted">Dùng dropdown trong danh sách để thay đổi vai trò</small>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label asp-for="MatKhauMoi" class="form-label"></label>
+                                <div class="input-group">
+                                    <input asp-for="MatKhauMoi" type="password" class="form-control" placeholder="Để trống nếu không đổi mật khẩu" />
+                                    <button class="btn btn-outline-secondary" type="button" onclick="togglePassword()">
+                                        👁️
+                                    </button>
+                                </div>
+                                <span asp-validation-for="MatKhauMoi" class="text-danger"></span>
+                                <small class="text-muted">Để trống nếu không muốn thay đổi mật khẩu</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Thông tin cá nhân -->
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h6 class="mb-0">👤 Thông tin cá nhân</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-12 mb-3">
+                                    <label asp-for="HoTen" class="form-label"></label>
+                                    <input asp-for="HoTen" class="form-control" placeholder="Nhập họ và tên đầy đủ" />
+                                    <span asp-validation-for="HoTen" class="text-danger"></span>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="SoDienThoai" class="form-label"></label>
+                                    <input asp-for="SoDienThoai" class="form-control" placeholder="0xxxxxxxxx" />
+                                    <span asp-validation-for="SoDienThoai" class="text-danger"></span>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label asp-for="Email" class="form-label"></label>
+                                    <input asp-for="Email" type="email" class="form-control" placeholder="email@example.com" />
+                                    <span asp-validation-for="Email" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Submit buttons -->
+                    <div class="d-flex justify-content-between">
+                        <a asp-action="Index" class="btn btn-secondary">
+                            ⬅️ Quay lại danh sách
+                        </a>
+                        <button type="submit" class="btn btn-warning btn-lg">
+                            💾 Cập nhật thông tin
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Info sidebar -->
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h6 class="mb-0">ℹ️ Thông tin tài khoản</h6>
+            </div>
+            <div class="card-body">
+                <p><strong>Tên đăng nhập:</strong> @Model.TenDangNhap</p>
+                <p>
+                    <strong>Vai trò:</strong>
+                    @switch (Model.VaiTro)
+                    {
+                        case "admin":
+                            <span class="badge bg-primary">👑 Admin</span>
+                            break;
+                        case "nhanvien":
+                            <span class="badge bg-warning">👨‍💼 Nhân viên</span>
+                            break;
+                        case "khach":
+                            <span class="badge bg-info">👤 Khách hàng</span>
+                            break;
+                    }
+                </p>
+
+                @if (Model.TenDangNhap == User.Identity.Name)
+                {
+                    <div class="alert alert-warning">
+                        <small>
+                            <strong>⚠️ Chú ý:</strong> Đây là tài khoản hiện tại của bạn.
+                            Hãy cẩn thận khi thay đổi thông tin.
+                        </small>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header">
+                <h6 class="mb-0">🔧 Các thao tác khác</h6>
+            </div>
+            <div class="card-body">
+                @if (Model.TenDangNhap != User.Identity.Name)
+                {
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-outline-warning" onclick="resetPassword()">
+                            🔄 Reset mật khẩu
+                        </button>
+                        <button class="btn btn-outline-danger" onclick="confirmDelete()">
+                            🗑️ Xóa tài khoản
+                        </button>
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-info">
+                        <small>
+                            Không thể thực hiện các thao tác này trên tài khoản hiện tại của bạn.
+                        </small>
+                    </div>
+                }
+            </div>
+        </div>
+
+        <div class="card mt-3">
+            <div class="card-header">
+                <h6 class="mb-0">📊 Thống kê</h6>
+            </div>
+            <div class="card-body">
+                <p class="mb-1"><strong>Lần cập nhật cuối:</strong></p>
+                <small class="text-muted">@DateTime.Now.ToString("dd/MM/yyyy HH:mm")</small>
+
+                @if (Model.VaiTro == "khach")
+                {
+                    <p class="mb-1 mt-2"><strong>Số đơn hàng:</strong></p>
+                    <small class="text-muted">Đang tải...</small>
+                }
+                else if (Model.VaiTro == "nhanvien" || Model.VaiTro == "admin")
+                {
+                    <p class="mb-1 mt-2"><strong>Đơn hàng đã xử lý:</strong></p>
+                    <small class="text-muted">Đang tải...</small>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        function togglePassword() {
+            const passwordInput = document.querySelector('input[name="MatKhauMoi"]');
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+        }
+
+        function resetPassword() {
+            if (confirm('Tạo mật khẩu mới ngẫu nhiên cho tài khoản này?')) {
+                const newPassword = generateRandomPassword();
+                document.querySelector('input[name="MatKhauMoi"]').value = newPassword;
+                alert(`Mật khẩu mới: ${newPassword}\nVui lòng ghi nhớ và thông báo cho người dùng.`);
+            }
+        }
+
+        function generateRandomPassword() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            let password = '';
+            for (let i = 0; i < 8; i++) {
+                password += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return password;
+        }
+
+        function confirmDelete() {
+            if (confirm(`Bạn có chắc chắn muốn xóa tài khoản "${@Model.TenDangNhap}"?\n\nHành động này không thể hoàn tác!`)) {
+                $.post('/AccountManagement/Delete', { username: '@Model.TenDangNhap' })
+                .done(function(response) {
+                    if (response.success) {
+                        alert(response.message);
+                        window.location.href = '/AccountManagement';
+                    } else {
+                        alert('Lỗi: ' + response.message);
+                    }
+                })
+                .fail(function() {
+                    alert('Có lỗi xảy ra khi xóa tài khoản.');
+                });
+            }
+        }
+
+        // Auto format phone number
+        document.querySelector('input[name="SoDienThoai"]').addEventListener('input', function() {
+            this.value = this.value.replace(/\D/g, '');
+            if (this.value.length > 10) {
+                this.value = this.value.substring(0, 10);
+            }
+        });
+    </script>
+}

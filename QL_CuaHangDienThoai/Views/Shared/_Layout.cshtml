@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Cửa Hàng Điện Thoại</title>
+    <title>@ViewData["Title"] - THẾ GIỚI SỜ-MÁT-PHÔN</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <style>
@@ -37,7 +37,7 @@
         <nav class="navbar navbar-expand-sm navbar-dark">
             <div class="container-fluid">
                 <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
-                    📱 Cửa Hàng Điện Thoại
+                    📱 THẾ GIỚI SỜ-MÁT-PHÔN N5UNETI
                 </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse">
                     <span class="navbar-toggler-icon"></span>
@@ -62,11 +62,12 @@
                                         <li><a class="dropdown-item" asp-controller="DienThoai" asp-action="Index">📱 Sản phẩm</a></li>
                                         <li><a class="dropdown-item" asp-controller="Admin" asp-action="QuanLyHoaDon">📋 Đơn hàng</a></li>
                                         <li><a class="dropdown-item" asp-controller="Admin" asp-action="XacNhanThanhToan">💳 Xác nhận thanh toán</a></li>
-                    
+                                        <li><a class="dropdown-item" asp-controller="DonHang" asp-action="CreateForCustomer">👨‍💼 Tạo đơn cho khách</a></li>
                                         @if (User.HasClaim("VaiTro", "admin"))
                                         {
                                             <li><hr class="dropdown-divider"></li>
-                                            <li><a class="dropdown-item" asp-controller="Admin" asp-action="QuanLyNguoiDung">👥 Người dùng</a></li>
+                                            <li><h6 class="dropdown-header">🔒 Chỉ Admin</h6></li>
+                                            <li><a class="dropdown-item" asp-controller="AccountManagement" asp-action="Index">👥 Quản lý tài khoản</a></li>
                                             <li><a class="dropdown-item" asp-controller="Admin" asp-action="BaoCaoChiTiet">📊 Báo cáo</a></li>
                                         }
                                     </ul>
@@ -130,7 +131,7 @@
 
     <footer class="border-top footer text-muted mt-5">
         <div class="container text-center py-3">
-            &copy; 2024 - Cửa Hàng Điện Thoại - Hệ thống quản lý bán hàng
+            &copy; 2025 - Cửa Hàng Điện Thoại Nhóm 5 UNETI - Bán hàng uy tín số 1 Hà Nội - LH: 012345678 (Zép lào); SHOP N5UNETI (Phở bò)
         </div>
     </footer>
 

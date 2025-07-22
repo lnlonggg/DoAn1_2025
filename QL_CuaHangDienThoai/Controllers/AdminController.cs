@@ -80,7 +80,7 @@ namespace QL_CuaHangDienThoai.Controllers
             // Báo cáo tổng quan
             var report = new
             {
-                // Doanh thu theo ngày (7 ngày gần nhất) - Sửa lỗi ToString
+                // Doanh thu theo ngày (7 ngày gần nhất)
                 DoanhThuTheoNgay = await _context.HoaDons
                     .Where(h => h.NgayLap >= DateTime.Today.AddDays(-6))
                     .GroupBy(h => h.NgayLap.Date)
@@ -188,13 +188,27 @@ namespace QL_CuaHangDienThoai.Controllers
         public async Task<IActionResult> ApprovePayment(string paymentId)
         {
             var payment = await _context.ThanhToanTrucTuyens
+                .Include(p => p.HoaDon)
                 .FirstOrDefaultAsync(p => p.MaThanhToan == paymentId);
 
             if (payment != null)
             {
+                // Lấy thông tin nhân viên đang xác nhận
+                var tenDangNhap = User.Identity.Name;
+                var nhanVien = await _context.QuanTriViens
+                    .FirstOrDefaultAsync(q => q.TenDangNhap == tenDangNhap);
+
+                // Cập nhật payment
                 payment.TrangThai = TrangThaiThanhToan.DaThanhToan;
                 payment.NgayCapNhat = DateTime.Now;
                 payment.ThongTinThem += $" - Được xác nhận bởi {User.Identity.Name} lúc {DateTime.Now:dd/MM/yyyy HH:mm}";
+
+                // Cập nhật hóa đơn với thông tin nhân viên xác nhận
+                if (payment.HoaDon != null && nhanVien != null)
+                {
+                    payment.HoaDon.MaQTV = nhanVien.MaQTV;
+                    _context.Update(payment.HoaDon);
+                }
 
                 _context.Update(payment);
                 await _context.SaveChangesAsync();

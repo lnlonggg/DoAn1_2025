@@ -73,6 +73,10 @@ namespace QL_CuaHangDienThoai.Models
         [StringLength(100)]
         public string? HoTen { get; set; }
 
+        [Column("SoDT")]           
+        [StringLength(15)]         
+        public string? SoDT { get; set; }
+
         [Column("Email")]
         [StringLength(100)]
         public string? Email { get; set; }

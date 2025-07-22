@@ -33,6 +33,13 @@
                                 <td><strong>Khách hàng:</strong></td>
                                 <td>@Model.KhachHang?.HoTen</td>
                             </tr>
+                            @if (Model.QuanTriVien != null)
+                            {
+                                <tr>
+                                    <td><strong>Nhân viên xử lý:</strong></td>
+                                    <td>@Model.QuanTriVien.HoTen (@Model.QuanTriVien.MaQTV)</td>
+                                </tr>
+                            }
                             <tr>
                                 <td><strong>Tổng tiền:</strong></td>
                                 <td><strong class="text-success">@Model.TongTien.ToString("C0")</strong></td>

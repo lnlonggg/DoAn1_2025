@@ -59,41 +59,6 @@
     </div>
 </div>
 
-<!-- Quick Actions - Phân quyền theo vai trò -->
-<div class="col-lg-6 mb-4">
-    <div class="card">
-        <div class="card-header">
-            <h5>⚡ Thao tác nhanh</h5>
-        </div>
-        <div class="card-body">
-            <div class="d-grid gap-2">
-                <a asp-controller="DienThoai" asp-action="Index" class="btn btn-outline-primary">
-                    📱 Quản lý sản phẩm
-                </a>
-                <a asp-action="QuanLyHoaDon" class="btn btn-outline-warning">
-                    📄 Quản lý đơn hàng
-                </a>
-                <a asp-action="XacNhanThanhToan" class="btn btn-outline-success">
-                    💳 Xác nhận thanh toán (@(ViewBag.PendingPayments ?? 0))
-                </a>
-                @* <a asp-action="SettingsQR" class="btn btn-outline-info">
-                    ⚙️ Cài đặt QR Code
-                </a> *@
-
-                @if (User.HasClaim("VaiTro", "admin"))
-                {
-                    <hr />
-                    <a asp-action="QuanLyNguoiDung" class="btn btn-outline-secondary">
-                        👥 Quản lý người dùng
-                    </a>
-                    <a asp-action="BaoCaoChiTiet" class="btn btn-outline-primary">
-                        📊 Báo cáo chi tiết
-                    </a>
-                }
-            </div>
-        </div>
-    </div>
-</div>
 
 <!-- Sản phẩm bán chạy -->
 <div class="row">
@@ -144,31 +109,35 @@
         </div>
     </div>
 
-    <!-- Quick Actions -->
+
+    <!-- Quick Actions - Phân quyền theo vai trò -->
     <div class="col-lg-6 mb-4">
         <div class="card">
             <div class="card-header">
-                <h5>⚡ Thao tác nhanh</h5>
+                <h5>⚡ MENU</h5>
             </div>
             <div class="card-body">
                 <div class="d-grid gap-2">
-                    <a asp-controller="DienThoai" asp-action="Index" class="btn btn-outline-primary">
-                        📱 Quản lý sản phẩm
-                    </a>
-                    <a asp-action="QuanLyNguoiDung" class="btn btn-outline-info">
-                        👥 Quản lý người dùng
-                    </a>
-                    <a asp-action="BaoCaoChiTiet" class="btn btn-outline-success">
-                        📊 Báo cáo chi tiết
-                    </a>
+                    
                     <a asp-action="QuanLyHoaDon" class="btn btn-outline-warning">
-                        📄 Quản lý hóa đơn
+                        📄 Quản lý đơn hàng
                     </a>
-                    <a asp-action="XacNhanThanhToan" class="btn btn-outline-warning">
+                    <a asp-action="XacNhanThanhToan" class="btn btn-outline-success">
                         💳 Xác nhận thanh toán (@(ViewBag.PendingPayments ?? 0))
                     </a>
+
+                    @if (User.HasClaim("VaiTro", "admin"))
+                    {
+                        <hr />
+                        <h6 class="text-muted">🔒 Chỉ Admin</h6>
+                        <a asp-controller="AccountManagement" asp-action="Index" class="btn btn-outline-danger">
+                            👥 Quản lý tài khoản
+                        </a>
+                        <a asp-action="BaoCaoChiTiet" class="btn btn-outline-primary">
+                            📊 Báo cáo chi tiết
+                        </a>
+                    }
                 </div>
             </div>
         </div>
     </div>
-</div>

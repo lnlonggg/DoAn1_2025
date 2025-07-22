@@ -83,7 +83,6 @@ namespace QL_CuaHangDienThoai.Controllers
         }
 
         // Xử lý tạo đơn hàng
-        // Thay thế method Create
         [Authorize(Policy = "CustomerOnly")]
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -115,11 +114,16 @@ namespace QL_CuaHangDienThoai.Controllers
                 // Tạo mã hóa đơn unique
                 var maHD = await GenerateUniqueOrderId();
 
-                // Tạo hóa đơn
+                // ❌ XÓA PHẦN NÀY - Khách hàng không thể là nhân viên
+                // Method Create này chỉ dành cho khách hàng đặt hàng trực tiếp
+                // Không cần lấy thông tin nhân viên
+
+                // Tạo hóa đơn (không có MaQTV vì khách tự đặt)
                 var hoaDon = new HoaDon
                 {
                     MaHD = maHD,
                     MaKH = khachHang.MaKH,
+                    MaQTV = null, // ← Khách hàng tự đặt = null
                     NgayLap = DateTime.Now,
                     TongTien = model.SoLuong * product.DonGia
                 };
@@ -157,6 +161,98 @@ namespace QL_CuaHangDienThoai.Controllers
 
             return View(model);
         }
+
+
+        // Nhân viên tạo đơn hàng cho khách hàng
+        [Authorize(Policy = "StaffOnly")]
+        [HttpGet]
+        public async Task<IActionResult> CreateForCustomer()
+        {
+            ViewBag.KhachHangs = await _context.KhachHangs.ToListAsync();
+            ViewBag.SanPhams = await _context.DienThoais.Where(dt => dt.SoLuongTon > 0).ToListAsync();
+
+            return View();
+        }
+
+        [Authorize(Policy = "StaffOnly")]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateForCustomer(string maKH, string maDT, int soLuong, string? ghiChu)
+        {
+            if (string.IsNullOrEmpty(maKH) || string.IsNullOrEmpty(maDT) || soLuong <= 0)
+            {
+                ModelState.AddModelError("", "Vui lòng nhập đầy đủ thông tin.");
+                ViewBag.KhachHangs = await _context.KhachHangs.ToListAsync();
+                ViewBag.SanPhams = await _context.DienThoais.Where(dt => dt.SoLuongTon > 0).ToListAsync();
+                return View();
+            }
+
+            var khachHang = await _context.KhachHangs.FindAsync(maKH);
+            var product = await _context.DienThoais.FindAsync(maDT);
+
+            if (khachHang == null || product == null)
+            {
+                TempData["ErrorMessage"] = "Thông tin khách hàng hoặc sản phẩm không hợp lệ.";
+                return RedirectToAction("CreateForCustomer");
+            }
+
+            if (product.SoLuongTon < soLuong)
+            {
+                TempData["ErrorMessage"] = $"Sản phẩm {product.TenDT} chỉ còn {product.SoLuongTon} trong kho.";
+                return RedirectToAction("CreateForCustomer");
+            }
+
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                // Lấy thông tin nhân viên hiện tại
+                var tenDangNhap = User.Identity.Name;
+                var nhanVien = await _context.QuanTriViens
+                    .FirstOrDefaultAsync(q => q.TenDangNhap == tenDangNhap);
+
+                // Tạo mã hóa đơn
+                var maHD = await GenerateUniqueOrderId();
+
+                // Tạo hóa đơn
+                var hoaDon = new HoaDon
+                {
+                    MaHD = maHD,
+                    MaKH = maKH,
+                    MaQTV = nhanVien?.MaQTV, // ← Nhân viên tạo đơn
+                    NgayLap = DateTime.Now,
+                    TongTien = soLuong * product.DonGia
+                };
+
+                // Tạo chi tiết hóa đơn
+                var chiTiet = new ChiTietHoaDon
+                {
+                    MaHD = maHD,
+                    MaDT = maDT,
+                    SoLuong = soLuong,
+                    DonGia = product.DonGia
+                };
+
+                // Cập nhật tồn kho
+                product.SoLuongTon -= soLuong;
+
+                _context.HoaDons.Add(hoaDon);
+                _context.ChiTietHoaDons.Add(chiTiet);
+                _context.Update(product);
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+
+                TempData["SuccessMessage"] = $"Tạo đơn hàng {maHD} cho khách hàng {khachHang.HoTen} thành công!";
+                return RedirectToAction("Details", new { id = maHD });
+            }
+            catch (Exception ex)
+            {
+                await transaction.RollbackAsync();
+                TempData["ErrorMessage"] = "Có lỗi xảy ra khi tạo đơn hàng. Vui lòng thử lại.";
+                return RedirectToAction("CreateForCustomer");
+            }
+        }
+
 
         // Trang thành công
         [Authorize(Policy = "CustomerOnly")]

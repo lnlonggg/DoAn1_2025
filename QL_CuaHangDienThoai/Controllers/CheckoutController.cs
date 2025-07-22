@@ -37,7 +37,7 @@ namespace QL_CuaHangDienThoai.Controllers
                 Cart = cart,
                 HoTenNguoiNhan = khachHang?.HoTen ?? "",
                 SoDienThoai = khachHang?.SoDT ?? "",
-                DiaChiGiaoHang = "", // Để khách hàng tự nhập
+                DiaChiGiaoHang = "", 
                 PhuongThucThanhToan = "COD"
             };
 
@@ -83,15 +83,27 @@ namespace QL_CuaHangDienThoai.Controllers
                     return View(model);
                 }
 
+                string? maNhanVien = null;
+                if (User.HasClaim("VaiTro", "admin") || User.HasClaim("VaiTro", "nhanvien"))
+                {
+                    var tenDangNhap = User.Identity.Name;
+                    var nhanVien = await _context.QuanTriViens
+                        .FirstOrDefaultAsync(q => q.TenDangNhap == tenDangNhap);
+                    maNhanVien = nhanVien?.MaQTV;
+                }
+
                 // Tạo hóa đơn
                 var orderId = await GenerateOrderId();
                 var hoaDon = new HoaDon
                 {
                     MaHD = orderId,
                     MaKH = khachHang.MaKH,
+                    MaQTV = maNhanVien,
                     NgayLap = DateTime.Now,
                     TongTien = model.Cart.TongTien
                 };
+
+                _context.HoaDons.Add(hoaDon);
 
                 _context.HoaDons.Add(hoaDon);
 

@@ -23,9 +23,17 @@
                         <h6>📅 Thông tin đơn hàng</h6>
                         <p class="mb-1"><strong>Mã đơn hàng:</strong> <span class="badge bg-primary">@Model.MaHD</span></p>
                         <p class="mb-1"><strong>Ngày đặt:</strong> @Model.NgayLap.ToString("dd/MM/yyyy HH:mm")</p>
+
                         @if (Model.QuanTriVien != null)
                         {
-                            <p class="mb-0"><strong>Nhân viên xử lý:</strong> @Model.QuanTriVien.HoTen</p>
+                            <p class="mb-1">
+                                <strong>Nhân viên xử lý:</strong>
+                                <span class="badge bg-info">@Model.QuanTriVien.MaQTV</span> - @Model.QuanTriVien.HoTen
+                            </p>
+                        }
+                        else
+                        {
+                            <p class="mb-1"><strong>Nhân viên xử lý:</strong> <span class="text-muted">Chưa xác định</span></p>
                         }
                     </div>
                 </div>

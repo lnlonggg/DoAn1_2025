@@ -1,0 +1,142 @@
+﻿@model IEnumerable<QL_CuaHangDienThoai.Models.HoaDon>
+@{
+    ViewData["Title"] = "Quản lý đơn hàng";
+}
+
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h2>📋 Quản lý đơn hàng</h2>
+        <p class="text-muted">Theo dõi và xử lý các đơn hàng của khách hàng</p>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <h5 class="text-success">@Model.Sum(h => h.TongTien).ToString("C0")</h5>
+                <small class="text-muted">Tổng doanh thu</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Filter Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h4 class="text-primary">@Model.Count()</h4>
+                <small>Tổng đơn hàng</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h4 class="text-success">@Model.Count(h => h.NgayLap.Date == DateTime.Today)</h4>
+                <small>Đơn hàng hôm nay</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h4 class="text-info">@Model.Count(h => h.NgayLap >= DateTime.Today.AddDays(-7))</h4>
+                <small>Đơn tuần này</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h4 class="text-warning">@Model.Count(h => h.NgayLap >= DateTime.Today.AddDays(-30))</h4>
+                <small>Đơn tháng này</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Orders Table -->
+<div class="card">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Mã đơn hàng</th>
+                        <th>Khách hàng</th>
+                        <th>Ngày đặt</th>
+                        <th>Sản phẩm</th>
+                        <th class="text-end">Tổng tiền</th>
+                        <th class="text-center">Trạng thái</th>
+                        <th class="text-center">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var order in Model)
+                    {
+                        <tr>
+                            <td>
+                                <span class="badge bg-primary">@order.MaHD</span>
+                            </td>
+                            <td>
+                                <strong>@order.KhachHang?.HoTen</strong><br>
+                                <small class="text-muted">@order.KhachHang?.SoDT</small>
+                            </td>
+                            <td>
+                                @order.NgayLap.ToString("dd/MM/yyyy")<br>
+                                <small class="text-muted">@order.NgayLap.ToString("HH:mm")</small>
+                            </td>
+                            <td>
+                                @if (order.ChiTietHoaDons?.Any() == true)
+                                {
+                                    @foreach (var item in order.ChiTietHoaDons.Take(2))
+                                    {
+                                        <small>• @item.DienThoai?.TenDT (x@item.SoLuong)</small>
+                            
+                                        <br>
+                                    }
+                                    @if (order.ChiTietHoaDons.Count > 2)
+                                    {
+                                        <small class="text-muted">... và @(order.ChiTietHoaDons.Count - 2) sản phẩm khác</small>
+                                    }
+                                }
+                            </td>
+                            <td class="text-end">
+                                <strong class="text-success">@order.TongTien.ToString("C0")</strong>
+                            </td>
+                            <td class="text-center">
+                                <span class="badge bg-success">✅ Hoàn thành</span>
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group" role="group">
+                                    <a asp-action="Details" asp-route-id="@order.MaHD" class="btn btn-sm btn-outline-info">
+                                        👁️ Xem
+                                    </a>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="printOrder('@order.MaHD')">
+                                        🖨️ In
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (!Model.Any())
+        {
+            <div class="text-center py-5">
+                <i class="fas fa-shopping-cart fa-5x text-muted mb-3"></i>
+                <h5 class="text-muted">Chưa có đơn hàng nào</h5>
+                <p class="text-muted">Các đơn hàng từ khách hàng sẽ hiển thị tại đây</p>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function printOrder(orderId) {
+            window.open(`/DonHang/Details/${orderId}`, '_blank');
+        }
+    </script>
+}

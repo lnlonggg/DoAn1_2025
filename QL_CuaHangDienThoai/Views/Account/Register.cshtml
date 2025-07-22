@@ -1,0 +1,73 @@
+﻿@model QL_CuaHangDienThoai.ViewModels.RegisterViewModel
+@{
+    ViewData["Title"] = "Đăng ký";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card">
+            <div class="card-header text-center">
+                <h4>Đăng ký tài khoản</h4>
+            </div>
+            <div class="card-body">
+                <form asp-action="Register" method="post">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="TenDangNhap" class="form-label"></label>
+                            <input asp-for="TenDangNhap" class="form-control" placeholder="Nhập tên đăng nhập" />
+                            <span asp-validation-for="TenDangNhap" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Email" class="form-label"></label>
+                            <input asp-for="Email" class="form-control" placeholder="Nhập email" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="HoTen" class="form-label"></label>
+                        <input asp-for="HoTen" class="form-control" placeholder="Nhập họ và tên" />
+                        <span asp-validation-for="HoTen" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="SoDT" class="form-label"></label>
+                        <input asp-for="SoDT" class="form-control" placeholder="Nhập số điện thoại" />
+                        <span asp-validation-for="SoDT" class="text-danger"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="MatKhau" class="form-label"></label>
+                            <input asp-for="MatKhau" class="form-control" placeholder="Nhập mật khẩu" />
+                            <span asp-validation-for="MatKhau" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="XacNhanMatKhau" class="form-label"></label>
+                            <input asp-for="XacNhanMatKhau" class="form-control" placeholder="Xác nhận mật khẩu" />
+                            <span asp-validation-for="XacNhanMatKhau" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success">Đăng ký</button>
+                    </div>
+
+                    <div class="text-center mt-3">
+                        <p>Đã có tài khoản? <a asp-action="Login">Đăng nhập ngay</a></p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

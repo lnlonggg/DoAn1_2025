@@ -1,0 +1,123 @@
+﻿@using QL_CuaHangDienThoai.Helpers
+@model IEnumerable<QL_CuaHangDienThoai.Models.DienThoai>
+@{
+    ViewData["Title"] = "Quản lý sản phẩm";
+}
+
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h2>📱 Quản lý sản phẩm</h2>
+    </div>
+    <div class="col-md-4 text-end">
+        @if (User.HasClaim("VaiTro", "admin"))
+        {
+            <a asp-action="Create" class="btn btn-success">
+                ➕ Thêm sản phẩm
+            </a>
+        }
+    </div>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show">
+        ✅ @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show">
+        ❌ @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+}
+
+<!-- Search -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form asp-action="Index" method="get">
+            <div class="row">
+                <div class="col-md-10">
+                    <div class="input-group">
+                        <span class="input-group-text">🔍</span>
+                        <input type="text" name="SearchString" value="@ViewData["CurrentFilter"]"
+                               class="form-control" placeholder="Tìm kiếm theo tên hoặc mã sản phẩm..." />
+                        <button class="btn btn-primary" type="submit">Tìm kiếm</button>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <a asp-action="Index" class="btn btn-outline-secondary w-100">🔄 Làm mới</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Products Grid với hình ảnh -->
+<div class="row">
+    @foreach (var item in Model)
+    {
+        <div class="col-md-6 col-lg-4 col-xl-3 mb-4">
+            <div class="card h-100">
+                <div class="card-img-top d-flex align-items-center justify-content-center" style="height: 200px; background: #f8f9fa;">
+                    <img src="@ImageHelper.GetProductImage(item.MaDT)"
+                         alt="@item.TenDT"
+                         class="img-fluid"
+                         style="max-height: 180px; object-fit: contain;"
+                         onerror="this.src='https://via.placeholder.com/300x300?text=No+Image'" />
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <h6 class="card-title">@item.TenDT</h6>
+                    <p class="text-muted small mb-2">Mã: @item.MaDT</p>
+                    <div class="mt-auto">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <strong class="text-success">@item.DonGia.ToString("C0")</strong>
+                            @if (item.SoLuongTon > 10)
+                            {
+                                <span class="badge bg-success">@item.SoLuongTon</span>
+                            }
+                            else if (item.SoLuongTon > 0)
+                            {
+                                <span class="badge bg-warning">@item.SoLuongTon</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">Hết hàng</span>
+                            }
+                        </div>
+                        <div class="btn-group w-100" role="group">
+                            <a asp-action="Details" asp-route-id="@item.MaDT"
+                               class="btn btn-sm btn-outline-info">👁️</a>
+                            @if (User.HasClaim("VaiTro", "admin"))
+                            {
+                                <a asp-action="Edit" asp-route-id="@item.MaDT"
+                                   class="btn btn-sm btn-outline-primary">✏️</a>
+                                <a asp-action="Delete" asp-route-id="@item.MaDT"
+                                   class="btn btn-sm btn-outline-danger">🗑️</a>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@if (!Model.Any())
+{
+    <div class="text-center py-5">
+        <h5 class="text-muted">📦 Không có sản phẩm nào</h5>
+        <p class="text-muted">
+            @if (string.IsNullOrEmpty(ViewData["CurrentFilter"]?.ToString()))
+            {
+                <span>Chưa có sản phẩm nào trong hệ thống.</span>
+            }
+            else
+            {
+                <span>Không tìm thấy sản phẩm nào phù hợp với từ khóa "<strong>@ViewData["CurrentFilter"]</strong>".</span>
+            }
+        </p>
+    </div>
+}

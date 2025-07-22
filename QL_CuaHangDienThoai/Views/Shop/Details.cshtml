@@ -1,0 +1,167 @@
+﻿@using QL_CuaHangDienThoai.Helpers
+@model QL_CuaHangDienThoai.Models.DienThoai
+@{
+    ViewData["Title"] = "Chi tiết sản phẩm";
+}
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-body text-center">
+                <img src="@ImageHelper.GetProductImage(Model.MaDT)"
+                     alt="@Model.TenDT"
+                     class="img-fluid rounded"
+                     style="max-height: 400px; object-fit: contain;"
+                     onerror="this.src='https://via.placeholder.com/400x400?text=No+Image'" />
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h4>📱 Thông tin sản phẩm</h4>
+            </div>
+            <div class="card-body">
+                <h3 class="mb-3">@Model.TenDT</h3>
+
+                <table class="table table-borderless">
+                    <tr>
+                        <td><strong>Mã sản phẩm:</strong></td>
+                        <td><span class="badge bg-primary">@Model.MaDT</span></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Giá bán:</strong></td>
+                        <td><h4 class="text-success mb-0">@Model.DonGia.ToString("C0")</h4></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Tình trạng:</strong></td>
+                        <td>
+                            @if (Model.SoLuongTon > 10)
+                            {
+                                <span class="badge bg-success fs-6">✅ Còn hàng</span>
+                            }
+                            else if (Model.SoLuongTon > 0)
+                            {
+                                <span class="badge bg-warning fs-6">⚠️ Chỉ còn @Model.SoLuongTon sản phẩm</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger fs-6">❌ Hết hàng</span>
+                            }
+                        </td>
+                    </tr>
+                </table>
+
+                <hr />
+
+                <!-- Quantity Selection -->
+                @if (Model.SoLuongTon > 0)
+                {
+                    <div class="mb-4">
+                        <label class="form-label"><strong>Số lượng:</strong></label>
+                        <div class="input-group" style="max-width: 150px;">
+                            <button class="btn btn-outline-secondary" type="button" onclick="decreaseQty()">-</button>
+                            <input type="number" id="quantity" class="form-control text-center" value="1" min="1" max="@Model.SoLuongTon" />
+                            <button class="btn btn-outline-secondary" type="button" onclick="increaseQty()">+</button>
+                        </div>
+                        <small class="text-muted">Tối đa: @Model.SoLuongTon sản phẩm</small>
+                    </div>
+                }
+
+                <!-- Action Buttons -->
+                <div class="d-grid gap-2">
+                    @if (Model.SoLuongTon > 0)
+                    {
+                        <a asp-controller="DonHang" asp-action="Create" asp-route-productId="@Model.MaDT" class="btn btn-success btn-lg">
+                            🛒 Đặt hàng ngay
+                        </a>
+                        <button class="btn btn-outline-primary btn-lg" onclick="addToCart('@Model.MaDT')">
+                            ❤️ Yêu thích
+                        </button>
+                    }
+                    else
+                    {
+                        <button class="btn btn-secondary btn-lg" disabled>
+                            😞 Sản phẩm đã hết hàng
+                        </button>
+                    }
+
+                    <a asp-action="Index" class="btn btn-outline-secondary">
+                        ⬅️ Quay lại cửa hàng
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Product Info -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5>📋 Mô tả sản phẩm</h5>
+            </div>
+            <div class="card-body">
+                <p>
+                    <strong>@Model.TenDT</strong> là một sản phẩm chất lượng cao,
+                    được thiết kế hiện đại và tích hợp nhiều tính năng ưu việt.
+                    Sản phẩm đảm bảo chất lượng và được bảo hành chính hãng.
+                </p>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6>✅ Ưu điểm:</h6>
+                        <ul class="list-unstyled">
+                            <li>🔹 Chất lượng cao, chính hãng 100%</li>
+                            <li>🔹 Bảo hành toàn quốc</li>
+                            <li>🔹 Hỗ trợ kỹ thuật 24/7</li>
+                            <li>🔹 Giao hàng nhanh chóng</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6>📦 Chính sách:</h6>
+                        <ul class="list-unstyled">
+                            <li>🔸 Đổi trả trong 7 ngày</li>
+                            <li>🔸 Miễn phí giao hàng</li>
+                            <li>🔸 Thanh toán khi nhận hàng</li>
+                            <li>🔸 Tích điểm thành viên</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function increaseQty() {
+            var qty = document.getElementById('quantity');
+            var max = parseInt(qty.getAttribute('max'));
+            var current = parseInt(qty.value);
+            if (current < max) {
+                qty.value = current + 1;
+            }
+        }
+
+        function decreaseQty() {
+            var qty = document.getElementById('quantity');
+            var current = parseInt(qty.value);
+            if (current > 1) {
+                qty.value = current - 1;
+            }
+        }
+
+        function addToCart(maDT) {
+            var quantity = document.getElementById('quantity').value;
+            alert(`Thêm ${quantity} sản phẩm ${maDT} vào giỏ hàng!\n\nTính năng giỏ hàng sẽ được phát triển tiếp.`);
+        }
+
+        function buyNow(maDT) {
+            var quantity = document.getElementById('quantity').value;
+            alert(`Mua ngay ${quantity} sản phẩm ${maDT}!\n\nTính năng đặt hàng sẽ được phát triển tiếp.`);
+        }
+    </script>
+}

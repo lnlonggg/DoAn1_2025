@@ -1,0 +1,121 @@
+﻿@{
+    ViewData["Title"] = "Dashboard Admin";
+}
+
+<div class="row mb-4">
+    <div class="col-12">
+        <h2>📊 Dashboard Quản Trị</h2>
+        <p class="text-muted">Tổng quan hoạt động kinh doanh của cửa hàng</p>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="card text-white" style="background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);">
+            <div class="card-body text-center">
+                <h2>@ViewBag.TongSanPham</h2>
+                <p class="mb-0">📱 Sản phẩm</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card text-white" style="background: linear-gradient(135deg, #00b894 0%, #55efc4 100%);">
+            <div class="card-body text-center">
+                <h2>@ViewBag.TongKhachHang</h2>
+                <p class="mb-0">👥 Khách hàng</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card text-white" style="background: linear-gradient(135deg, #e17055 0%, #fd79a8 100%);">
+            <div class="card-body text-center">
+                <h2>@ViewBag.TongHoaDon</h2>
+                <p class="mb-0">📄 Hóa đơn</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card text-white" style="background: linear-gradient(135deg, #fdcb6e 0%, #f39c12 100%);">
+            <div class="card-body text-center">
+                <h2>@(((decimal)ViewBag.TongDoanhThu).ToString("C0"))</h2>
+                <p class="mb-0">💰 Doanh thu</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Sản phẩm bán chạy -->
+<div class="row">
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>🔥 Sản phẩm bán chạy</h5>
+            </div>
+            <div class="card-body">
+                @if (ViewBag.SanPhamBanChay != null && ((IEnumerable<dynamic>)ViewBag.SanPhamBanChay).Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Sản phẩm</th>
+                                    <th class="text-center">Số lượng</th>
+                                    <th class="text-end">Doanh thu</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in (IEnumerable<dynamic>)ViewBag.SanPhamBanChay)
+                                {
+                                    <tr>
+                                        <td>
+                                            <strong>@item.TenDT</strong><br>
+                                            <small class="text-muted">@item.MaDT</small>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge bg-primary">@item.SoLuongBan</span>
+                                        </td>
+                                        <td class="text-end">
+                                            <strong class="text-success">@(((decimal)item.DoanhThu).ToString("C0"))</strong>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center py-4">
+                        <p class="text-muted mb-0">Chưa có dữ liệu bán hàng</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>⚡ Thao tác nhanh</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <a asp-controller="DienThoai" asp-action="Index" class="btn btn-outline-primary">
+                        📱 Quản lý sản phẩm
+                    </a>
+                    <a asp-action="QuanLyNguoiDung" class="btn btn-outline-info">
+                        👥 Quản lý người dùng
+                    </a>
+                    <a asp-action="BaoCaoChiTiet" class="btn btn-outline-success">
+                        📊 Báo cáo chi tiết
+                    </a>
+                    <a asp-action="QuanLyHoaDon" class="btn btn-outline-warning">
+                        📄 Quản lý hóa đơn
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

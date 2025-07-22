@@ -1,0 +1,91 @@
+﻿@using QL_CuaHangDienThoai.Helpers
+@model QL_CuaHangDienThoai.Models.DienThoai
+@{
+    ViewData["Title"] = "Chi tiết sản phẩm";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4>👁️ Chi tiết sản phẩm</h4>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4 text-center">
+                        <img src="@ImageHelper.GetProductImage(Model.MaDT)"
+                             alt="@Model.TenDT"
+                             class="img-fluid rounded"
+                             style="max-height: 300px; object-fit: contain;"
+                             onerror="this.src='https://via.placeholder.com/300x300?text=No+Image'" />
+                    </div>
+                    <div class="col-md-8">
+                        <table class="table table-borderless">
+                            <tr>
+                                <td><strong>Mã sản phẩm:</strong></td>
+                                <td><span class="badge bg-primary">@Html.DisplayFor(model => model.MaDT)</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Tên sản phẩm:</strong></td>
+                                <td>@Html.DisplayFor(model => model.TenDT)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Giá bán:</strong></td>
+                                <td><span class="text-success fw-bold fs-4">@Model.DonGia.ToString("C0")</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Tồn kho:</strong></td>
+                                <td>
+                                    @if (Model.SoLuongTon > 10)
+                                    {
+                                        <span class="badge bg-success fs-6">@Model.SoLuongTon sản phẩm</span>
+                                    }
+                                    else if (Model.SoLuongTon > 0)
+                                    {
+                                        <span class="badge bg-warning fs-6">@Model.SoLuongTon sản phẩm</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger fs-6">Hết hàng</span>
+                                    }
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><strong>Trạng thái:</strong></td>
+                                <td>
+                                    @if (Model.SoLuongTon > 0)
+                                    {
+                                        <span class="badge bg-success">✅ Còn hàng</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">❌ Hết hàng</span>
+                                    }
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <hr />
+
+                <div class="d-flex justify-content-between">
+                    <a asp-action="Index" class="btn btn-secondary">
+                        ⬅️ Quay lại danh sách
+                    </a>
+                    @if (User.HasClaim("VaiTro", "admin"))
+                    {
+                        <div>
+                            <a asp-action="Edit" asp-route-id="@Model.MaDT" class="btn btn-primary">
+                                ✏️ Chỉnh sửa
+                            </a>
+                            <a asp-action="Delete" asp-route-id="@Model.MaDT" class="btn btn-danger">
+                                🗑️ Xóa
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

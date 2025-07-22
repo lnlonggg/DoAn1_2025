@@ -1,0 +1,160 @@
+﻿@using QL_CuaHangDienThoai.Helpers
+@model QL_CuaHangDienThoai.ViewModels.CreateOrderViewModel
+@{
+    ViewData["Title"] = "Đặt hàng";
+}
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h4>📝 Thông tin đặt hàng</h4>
+            </div>
+            <div class="card-body">
+                <form asp-action="Create" method="post">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                    <input type="hidden" asp-for="MaDT" />
+                    <input type="hidden" asp-for="TenDT" />
+                    <input type="hidden" asp-for="DonGia" />
+                    <input type="hidden" asp-for="SoLuongTon" />
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="HoTenNguoiNhan" class="form-label"></label>
+                            <input asp-for="HoTenNguoiNhan" class="form-control" placeholder="Nhập họ và tên" />
+                            <span asp-validation-for="HoTenNguoiNhan" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="SoDienThoai" class="form-label"></label>
+                            <input asp-for="SoDienThoai" class="form-control" placeholder="Nhập số điện thoại" />
+                            <span asp-validation-for="SoDienThoai" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="DiaChiGiaoHang" class="form-label"></label>
+                        <textarea asp-for="DiaChiGiaoHang" class="form-control" rows="3" placeholder="Nhập địa chỉ giao hàng chi tiết"></textarea>
+                        <span asp-validation-for="DiaChiGiaoHang" class="text-danger"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="SoLuong" class="form-label"></label>
+                            <div class="input-group">
+                                <button class="btn btn-outline-secondary" type="button" onclick="decreaseQty()">-</button>
+                                <input asp-for="SoLuong" class="form-control text-center" min="1" max="@Model.SoLuongTon" onchange="updateTotal()" />
+                                <button class="btn btn-outline-secondary" type="button" onclick="increaseQty()">+</button>
+                            </div>
+                            <small class="text-muted">Tối đa: @Model.SoLuongTon sản phẩm</small>
+                            <span asp-validation-for="SoLuong" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Thành tiền</label>
+                            <div class="form-control bg-light">
+                                <strong id="thanhTien" class="text-success">@Model.ThanhTien.ToString("C0")</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="GhiChu" class="form-label"></label>
+                        <textarea asp-for="GhiChu" class="form-control" rows="2" placeholder="Ghi chú thêm (nếu có)"></textarea>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a asp-controller="Shop" asp-action="Details" asp-route-id="@Model.MaDT" class="btn btn-secondary">
+                            ⬅️ Quay lại
+                        </a>
+                        <button type="submit" class="btn btn-success btn-lg">
+                            🛒 Đặt hàng ngay
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5>📱 Thông tin sản phẩm</h5>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-3">
+                    <img src="@ImageHelper.GetProductImage(Model.MaDT)"
+                         alt="@Model.TenDT"
+                         class="img-fluid rounded"
+                         style="max-height: 200px; object-fit: contain;" />
+                </div>
+
+                <h6>@Model.TenDT</h6>
+                <p class="text-muted small">Mã: @Model.MaDT</p>
+                <p class="text-success"><strong>@Model.DonGia.ToString("C0")</strong></p>
+
+                <hr />
+
+                <div class="d-flex justify-content-between">
+                    <span>Đơn giá:</span>
+                    <span>@Model.DonGia.ToString("C0")</span>
+                </div>
+                <div class="d-flex justify-content-between">
+                    <span>Số lượng:</span>
+                    <span id="displayQty">@Model.SoLuong</span>
+                </div>
+                <hr />
+                <div class="d-flex justify-content-between">
+                    <strong>Tổng cộng:</strong>
+                    <strong id="displayTotal" class="text-success">@Model.ThanhTien.ToString("C0")</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        var DonGia = @Model.DonGia;
+        var maxQty = @Model.SoLuongTon;
+
+        function increaseQty() {
+            var qtyInput = document.getElementById('SoLuong');
+            var current = parseInt(qtyInput.value);
+            if (current < maxQty) {
+                qtyInput.value = current + 1;
+                updateTotal();
+            }
+        }
+
+        function decreaseQty() {
+            var qtyInput = document.getElementById('SoLuong');
+            var current = parseInt(qtyInput.value);
+            if (current > 1) {
+                qtyInput.value = current - 1;
+                updateTotal();
+            }
+        }
+
+        function updateTotal() {
+            var qty = parseInt(document.getElementById('SoLuong').value);
+            var total = qty * DonGia;
+
+            document.getElementById('thanhTien').textContent = total.toLocaleString('vi-VN', {
+                style: 'currency',
+                currency: 'VND'
+            });
+
+            document.getElementById('displayQty').textContent = qty;
+            document.getElementById('displayTotal').textContent = total.toLocaleString('vi-VN', {
+                style: 'currency',
+                currency: 'VND'
+            });
+        }
+    </script>
+}

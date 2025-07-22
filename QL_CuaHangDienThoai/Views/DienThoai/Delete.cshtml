@@ -1,0 +1,79 @@
+﻿@using QL_CuaHangDienThoai.Helpers
+@model QL_CuaHangDienThoai.Models.DienThoai
+@{
+    ViewData["Title"] = "Xóa sản phẩm";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white">
+                <h4>🗑️ Xác nhận xóa sản phẩm</h4>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Cảnh báo!</strong> Bạn có chắc chắn muốn xóa sản phẩm này không? Hành động này không thể hoàn tác.
+                </div>
+
+                <div class="row">
+                    <div class="col-md-4 text-center">
+                        <img src="@ImageHelper.GetProductImage(Model.MaDT)"
+                             alt="@Model.TenDT"
+                             class="img-fluid rounded"
+                             style="max-height: 200px; object-fit: contain;"
+                             onerror="this.src='https://via.placeholder.com/300x300?text=No+Image'" />
+                    </div>
+                    <div class="col-md-8">
+                        <table class="table table-borderless">
+                            <tr>
+                                <td><strong>Mã sản phẩm:</strong></td>
+                                <td><span class="badge bg-primary">@Html.DisplayFor(model => model.MaDT)</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Tên sản phẩm:</strong></td>
+                                <td>@Html.DisplayFor(model => model.TenDT)</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Giá bán:</strong></td>
+                                <td><span class="text-success fw-bold">@Model.DonGia.ToString("C0")</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Tồn kho:</strong></td>
+                                <td>
+                                    @if (Model.SoLuongTon > 10)
+                                    {
+                                        <span class="badge bg-success">@Model.SoLuongTon</span>
+                                    }
+                                    else if (Model.SoLuongTon > 0)
+                                    {
+                                        <span class="badge bg-warning">@Model.SoLuongTon</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">Hết hàng</span>
+                                    }
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <hr />
+
+                <div class="d-flex justify-content-between">
+                    <a asp-action="Index" class="btn btn-secondary">
+                        ⬅️ Hủy bỏ
+                    </a>
+                    <form asp-action="Delete" method="post" class="d-inline">
+                        <input type="hidden" asp-for="MaDT" />
+                        <button type="submit" class="btn btn-danger"
+                                onclick="return confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')">
+                            🗑️ Xác nhận xóa
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,174 @@
+﻿@using QL_CuaHangDienThoai.Helpers
+@model IEnumerable<QL_CuaHangDienThoai.Models.DienThoai>
+@{
+    ViewData["Title"] = "Cửa hàng";
+}
+
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h2>🛍️ Cửa hàng điện thoại</h2>
+        <p class="text-muted">Khám phá những sản phẩm chất lượng cao</p>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body">
+                <small class="text-muted">Tổng cộng: <strong>@Model.Count()</strong> sản phẩm</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Search and Filter -->
+<div class="card mb-4">
+    <div class="card-body">
+        <form asp-action="Index" method="get">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text">🔍</span>
+                        <input type="text" name="SearchString" value="@ViewData["CurrentFilter"]"
+                               class="form-control" placeholder="Tìm kiếm sản phẩm..." />
+                        <button class="btn btn-primary" type="submit">Tìm kiếm</button>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    @{
+                        var currentSort = ViewData["CurrentSort"]?.ToString() ?? "";
+                    }
+                    <select name="sortOrder" class="form-select" onchange="this.form.submit()">
+                        <option value="">Sắp xếp theo tên A-Z</option>
+                        @if (currentSort == "name_desc")
+                        {
+                            <option value="name_desc" selected>Tên Z-A</option>
+                        }
+                        else
+                        {
+                            <option value="name_desc">Tên Z-A</option>
+                        }
+
+                        @if (currentSort == "price")
+                        {
+                            <option value="price" selected>Giá thấp → cao</option>
+                        }
+                        else
+                        {
+                            <option value="price">Giá thấp → cao</option>
+                        }
+
+                        @if (currentSort == "price_desc")
+                        {
+                            <option value="price_desc" selected>Giá cao → thấp</option>
+                        }
+                        else
+                        {
+                            <option value="price_desc">Giá cao → thấp</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <a asp-action="Index" class="btn btn-outline-secondary w-100">🔄 Làm mới</a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Products Grid -->
+<div class="row">
+    @foreach (var item in Model)
+    {
+        <div class="col-md-6 col-lg-4 col-xl-3 mb-4">
+            <div class="card h-100 product-card">
+                <div class="card-img-top d-flex align-items-center justify-content-center" style="height: 200px; background: #f8f9fa;">
+                    <img src="@ImageHelper.GetProductImage(item.MaDT)" 
+                         alt="@item.TenDT" 
+                         class="img-fluid" 
+                         style="max-height: 180px; object-fit: contain;"
+                         onerror="this.src='https://via.placeholder.com/300x300?text=No+Image'" />
+                </div>
+                <div class="card-body d-flex flex-column">
+                    <h6 class="card-title">@item.TenDT</h6>
+                    <p class="text-muted small mb-2">Mã: @item.MaDT</p>
+                    <div class="mt-auto">
+                        <div class="mb-3">
+                            <h5 class="text-success mb-2">@item.DonGia.ToString("C0")</h5>
+                            @if (item.SoLuongTon > 10)
+                            {
+                                <span class="badge bg-success">✅ Còn hàng</span>
+                            }
+                            else if (item.SoLuongTon > 0)
+                            {
+                                <span class="badge bg-warning">⚠️ Sắp hết (@item.SoLuongTon)</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">❌ Hết hàng</span>
+                            }
+                        </div>
+                        <div class="d-grid gap-2">
+                            <a asp-action="Details" asp-route-id="@item.MaDT" class="btn btn-outline-info btn-sm">
+                                👁️ Xem chi tiết
+                            </a>
+                            @if (item.SoLuongTon > 0)
+                            {
+                                <button class="btn btn-primary btn-sm" onclick="addToCart('@item.MaDT')">
+                                    🛒 Thêm vào giỏ
+                                </button>
+                            }
+                            else
+                            {
+                                <button class="btn btn-secondary btn-sm" disabled>
+                                    😞 Hết hàng
+                                </button>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@if (!Model.Any())
+{
+    <div class="text-center py-5">
+        <h5 class="text-muted">📦 Không có sản phẩm nào</h5>
+        <p class="text-muted">
+            @if (string.IsNullOrEmpty(ViewData["CurrentFilter"]?.ToString()))
+            {
+                <span>Hiện tại không có sản phẩm nào còn hàng.</span>
+            }
+            else
+            {
+                <span>Không tìm thấy sản phẩm nào phù hợp với từ khóa "<strong>@ViewData["CurrentFilter"]</strong>".</span>
+            }
+        </p>
+        <a asp-controller="Home" asp-action="Index" class="btn btn-primary">
+            🏠 Về trang chủ
+        </a>
+    </div>
+}
+
+<style>
+    .product-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border: none;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .product-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+    }
+</style>
+
+@section Scripts {
+    <script>
+        function addToCart(maDT) {
+            // Tạm thời chỉ hiển thị thông báo
+            alert('Tính năng giỏ hàng sẽ được phát triển tiếp!');
+            console.log('Thêm sản phẩm vào giỏ:', maDT);
+        }
+    </script>
+}

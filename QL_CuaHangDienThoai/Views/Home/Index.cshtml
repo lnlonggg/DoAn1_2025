@@ -1,0 +1,220 @@
+﻿@using QL_CuaHangDienThoai.Helpers
+@model IEnumerable<QL_CuaHangDienThoai.Models.DienThoai>
+@{
+    ViewData["Title"] = "Trang chủ";
+}
+
+<!-- Hero Section -->
+<div class="hero-section mb-5">
+    <div class="row align-items-center">
+        <div class="col-lg-6">
+            <h1 class="display-4 fw-bold mb-4">
+                📱 Cửa Hàng Điện Thoại
+            </h1>
+            <p class="lead mb-4">
+                Hệ thống quản lý bán hàng điện thoại hiện đại,
+                mang đến cho bạn trải nghiệm mua sắm tuyệt vời với những sản phẩm chất lượng cao.
+            </p>
+            @if (!User.Identity.IsAuthenticated)
+            {
+                <div class="d-flex gap-3">
+                    <a asp-controller="Account" asp-action="Login" class="btn btn-primary btn-lg">
+                        🔑 Đăng nhập
+                    </a>
+                    <a asp-controller="Account" asp-action="Register" class="btn btn-success btn-lg">
+                        📝 Đăng ký
+                    </a>
+                </div>
+            }
+            else
+            {
+                <div class="d-flex gap-3">
+                    <a href="#products" class="btn btn-primary btn-lg">
+                        🛒 Xem sản phẩm
+                    </a>
+                </div>
+            }
+        </div>
+        <div class="col-lg-6 text-center">
+            <div>
+                <i class="fas fa-store fa-10x text-primary" style="opacity: 0.8;"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Statistics -->
+<div class="row mb-5">
+    <div class="col-md-6 mb-3">
+        <div class="card text-center" style="background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%); color: white;">
+            <div class="card-body">
+                <i class="fas fa-mobile-alt fa-3x mb-3"></i>
+                <h3>@ViewBag.TongSanPham</h3>
+                <p class="mb-0">Sản phẩm đa dạng</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6 mb-3">
+        <div class="card text-center" style="background: linear-gradient(135deg, #00b894 0%, #55efc4 100%); color: white;">
+            <div class="card-body">
+                <i class="fas fa-users fa-3x mb-3"></i>
+                <h3>@(ViewBag.TongKhachHang)+</h3>
+                <p class="mb-0">Khách hàng tin tưởng</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Features Section -->
+<div class="row mb-5">
+    <div class="col-12 text-center mb-4">
+        <h2>⭐ Tại sao chọn chúng tôi?</h2>
+        <p class="text-muted">Những ưu điểm vượt trội của hệ thống</p>
+    </div>
+
+    <div class="col-md-4 mb-4">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <div class="feature-icon mb-3">
+                    <i class="fas fa-shield-alt fa-3x text-primary"></i>
+                </div>
+                <h5 class="card-title">Đảm bảo chất lượng</h5>
+                <p class="card-text">
+                    Tất cả sản phẩm đều được kiểm tra kỹ lưỡng,
+                    đảm bảo chất lượng và chính hãng 100%.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-4">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <div class="feature-icon mb-3">
+                    <i class="fas fa-shipping-fast fa-3x text-success"></i>
+                </div>
+                <h5 class="card-title">Giao hàng nhanh chóng</h5>
+                <p class="card-text">
+                    Hỗ trợ giao hàng tận nơi trong ngày,
+                    đảm bảo sản phẩm đến tay khách hàng an toàn.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-4">
+        <div class="card text-center h-100">
+            <div class="card-body">
+                <div class="feature-icon mb-3">
+                    <i class="fas fa-headset fa-3x text-info"></i>
+                </div>
+                <h5 class="card-title">Hỗ trợ 24/7</h5>
+                <p class="card-text">
+                    Đội ngũ tư vấn viên chuyên nghiệp,
+                    sẵn sàng hỗ trợ khách hàng mọi lúc mọi nơi.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Featured Products -->
+@if (Model != null && Model.Any())
+{
+    <div id="products" class="row">
+        <div class="col-12 text-center mb-4">
+            <h2>🔥 Sản phẩm nổi bật</h2>
+            <p class="text-muted">Những sản phẩm mới nhất và chất lượng nhất</p>
+        </div>
+
+        @foreach (var product in Model)
+        {
+            <div class="col-md-6 col-lg-4 mb-4">
+                <div class="card h-100 product-card">
+                    <div class="card-img-top d-flex align-items-center justify-content-center" style="height: 250px; background: #f8f9fa;">
+                        <img src="@ImageHelper.GetProductImage(product.MaDT)"
+                             alt="@product.TenDT"
+                             class="img-fluid"
+                             style="max-height: 230px; object-fit: contain;"
+                             onerror="this.src='https://via.placeholder.com/300x300?text=No+Image'" />
+                    </div>
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">@product.TenDT</h5>
+                        <p class="text-muted small mb-2">Mã: @product.MaDT</p>
+                        <div class="mt-auto">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h4 class="text-success mb-0">@product.DonGia.ToString("C0")</h4>
+                                @if (product.SoLuongTon > 10)
+                                {
+                                    <span class="badge bg-success">Còn hàng</span>
+                                }
+                                else if (product.SoLuongTon > 0)
+                                {
+                                    <span class="badge bg-warning">Sắp hết</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-danger">Hết hàng</span>
+                                }
+                            </div>
+                            @if (!User.Identity.IsAuthenticated)
+                            {
+                                <a asp-controller="Account" asp-action="Login" class="btn btn-outline-primary w-100">
+                                    🔑 Đăng nhập để mua hàng
+                                </a>
+                            }
+                            else
+                            {
+                                <a href="#" class="btn btn-primary w-100">
+                                    🛒 Xem chi tiết
+                                </a>
+                            }
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <div class="col-12 text-center mt-4">
+            @if (!User.Identity.IsAuthenticated)
+            {
+                <a asp-controller="Account" asp-action="Register" class="btn btn-success btn-lg">
+                    📝 Đăng ký để khám phá thêm
+                </a>
+            }
+            else
+            {
+                <a href="#" class="btn btn-primary btn-lg">
+                    🛍️ Xem tất cả sản phẩm
+                </a>
+            }
+        </div>
+    </div>
+}
+
+<style>
+    .hero-section {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 60px 30px;
+        border-radius: 20px;
+        margin: 20px 0;
+    }
+
+    .feature-icon {
+        transition: transform 0.3s ease;
+    }
+
+    .card:hover .feature-icon {
+        transform: scale(1.1);
+    }
+
+    .product-card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+        }
+</style>
+}

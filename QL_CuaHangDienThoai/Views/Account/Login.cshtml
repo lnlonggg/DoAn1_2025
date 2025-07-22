@@ -1,0 +1,71 @@
+﻿@model QL_CuaHangDienThoai.ViewModels.LoginViewModel
+@{
+    ViewData["Title"] = "Đăng nhập";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-4">
+        <div class="card">
+            <div class="card-header text-center">
+                <h4>Đăng nhập</h4>
+            </div>
+            <div class="card-body">
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success">
+                        @TempData["SuccessMessage"]
+                    </div>
+                }
+
+                <form asp-action="Login" method="post">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="TenDangNhap" class="form-label"></label>
+                        <input asp-for="TenDangNhap" class="form-control" placeholder="Nhập tên đăng nhập" />
+                        <span asp-validation-for="TenDangNhap" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="MatKhau" class="form-label"></label>
+                        <input asp-for="MatKhau" class="form-control" placeholder="Nhập mật khẩu" />
+                        <span asp-validation-for="MatKhau" class="text-danger"></span>
+                    </div>
+
+                    <div class="mb-3 form-check">
+                        <input asp-for="RememberMe" class="form-check-input" />
+                        <label asp-for="RememberMe" class="form-check-label"></label>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary">Đăng nhập</button>
+                    </div>
+
+                    <div class="text-center mt-3">
+                        <p>Chưa có tài khoản? <a asp-action="Register">Đăng ký ngay</a></p>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Demo accounts -->
+        <div class="card mt-3">
+            <div class="card-header">
+                <h6>Tài khoản demo</h6>
+            </div>
+            <div class="card-body">
+                <small>
+                    <strong>Admin:</strong> admin001 / adminpass<br>
+                    <strong>Nhân viên:</strong> nv001 / nhanvienpass<br>
+                    <strong>Khách hàng:</strong> khach001 / 123456
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

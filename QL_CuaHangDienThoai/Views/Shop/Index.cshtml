@@ -112,7 +112,7 @@
                             </a>
                             @if (item.SoLuongTon > 0)
                             {
-                                <button class="btn btn-primary btn-sm" onclick="addToCart('@item.MaDT')">
+                                <button class="btn btn-primary btn-sm" onclick="addToCart('@item.MaDT', 1)">
                                     🛒 Thêm vào giỏ
                                 </button>
                             }
@@ -163,12 +163,69 @@
     }
 </style>
 
-@section Scripts {
+@* @section Scripts {
     <script>
         function addToCart(maDT) {
             // Tạm thời chỉ hiển thị thông báo
             alert('Tính năng giỏ hàng sẽ được phát triển tiếp!');
             console.log('Thêm sản phẩm vào giỏ:', maDT);
         }
+    </script>
+} *@
+
+@section Scripts {
+    <script>
+        function addToCart(productId, quantity) {
+            $.post('/Cart/AddToCart', {
+                MaDT: productId,
+                SoLuong: quantity || 1
+            })
+            .done(function(response) {
+                if (response.success) {
+                    // Cập nhật badge giỏ hàng
+                    $('#cart-badge').text(response.cartCount);
+
+                    // Hiển thị thông báo
+                    showToast(response.message, 'success');
+                } else {
+                    showToast(response.message || 'Có lỗi xảy ra', 'error');
+                }
+            })
+            .fail(function() {
+                showToast('Vui lòng đăng nhập để thêm vào giỏ hàng', 'warning');
+            });
+        }
+
+        function showToast(message, type) {
+            // Tạo toast notification
+            var toast = $(`
+                <div class="toast align-items-center text-bg-${type === 'success' ? 'success' : type === 'error' ? 'danger' : 'warning'} border-0" role="alert">
+                    <div class="d-flex">
+                        <div class="toast-body">${message}</div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                    </div>
+                </div>
+            `);
+
+            // Thêm vào container
+            if ($('#toast-container').length === 0) {
+                $('body').append('<div id="toast-container" class="toast-container position-fixed bottom-0 end-0 p-3"></div>');
+            }
+
+            $('#toast-container').append(toast);
+            var bsToast = new bootstrap.Toast(toast[0]);
+            bsToast.show();
+
+            // Tự động xóa sau 3 giây
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // Load cart count khi trang tải
+        $(document).ready(function() {
+            $.get('/Cart/GetCartCount')
+            .done(function(response) {
+                $('#cart-badge').text(response.count || 0);
+            });
+        });
     </script>
 }

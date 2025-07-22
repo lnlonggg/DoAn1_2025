@@ -63,6 +63,14 @@
                                 <li class="nav-item">
                                     <a class="nav-link" asp-controller="DonHang" asp-action="MyOrders">📋 Đơn hàng của tôi</a>
                                 </li>
+                                <li class="nav-item">
+                                    <a class="nav-link position-relative" asp-controller="Cart" asp-action="Index">
+                                        🛒 Giỏ hàng
+                                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" id="cart-badge" style="font-size: 0.6em;">
+                                            0
+                                        </span>
+                                    </a>
+                                </li>
                             }
                         }
                     </ul>

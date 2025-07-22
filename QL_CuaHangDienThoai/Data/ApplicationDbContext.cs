@@ -16,6 +16,11 @@ namespace QL_CuaHangDienThoai.Data
         public DbSet<HoaDon> HoaDons { get; set; }
         public DbSet<ChiTietHoaDon> ChiTietHoaDons { get; set; }
 
+
+        //Thêm thanh toán và giỏ hàng
+        public DbSet<GioHang> GioHangs { get; set; }
+        public DbSet<ChiTietGioHang> ChiTietGioHangs { get; set; }
+        public DbSet<ThanhToanTrucTuyen> ThanhToanTrucTuyens { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -71,6 +76,25 @@ namespace QL_CuaHangDienThoai.Data
                 .HasOne(c => c.DienThoai)
                 .WithMany(d => d.ChiTietHoaDons)
                 .HasForeignKey(c => c.MaDT);
+
+            base.OnModelCreating(modelBuilder);
+
+            // Cấu hình composite key cho ChiTietGioHang
+            modelBuilder.Entity<ChiTietGioHang>()
+                .HasKey(ct => new { ct.MaGH, ct.MaDT });
+
+            // Cấu hình composite key cho ChiTietHoaDon (nếu chưa có)
+            modelBuilder.Entity<ChiTietHoaDon>()
+                .HasKey(ct => new { ct.MaHD, ct.MaDT });
+
+            // Cấu hình enum
+            modelBuilder.Entity<ThanhToanTrucTuyen>()
+                .Property(e => e.TrangThai)
+                .HasConversion<string>();
         }
+
+        
+
+        
     }
 }

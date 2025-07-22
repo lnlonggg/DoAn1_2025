@@ -171,4 +171,105 @@ namespace QL_CuaHangDienThoai.Models
         [ForeignKey("MaDT")]
         public virtual DienThoai? DienThoai { get; set; }
     }
+
+    [Table("GIOHANG")]
+    public class GioHang
+    {
+        [Key]
+        [Column("MaGH")]
+        [StringLength(10)]
+        public string MaGH { get; set; } = string.Empty;
+
+        [Column("MaKH")]
+        [StringLength(10)]
+        public string MaKH { get; set; } = string.Empty;
+
+        [Column("NgayTao")]
+        public DateTime NgayTao { get; set; }
+
+        // Navigation properties
+        [ForeignKey("MaKH")]
+        public virtual KhachHang? KhachHang { get; set; }
+        public virtual ICollection<ChiTietGioHang> ChiTietGioHangs { get; set; } = new List<ChiTietGioHang>();
+    }
+
+    [Table("CHITIETGIOHANG")]
+    public class ChiTietGioHang
+    {
+        [Key]
+        [Column("MaGH")]
+        [StringLength(10)]
+        public string MaGH { get; set; } = string.Empty;
+
+        [Key]
+        [Column("MaDT")]
+        [StringLength(10)]
+        public string MaDT { get; set; } = string.Empty;
+
+        [Column("SoLuong")]
+        public int SoLuong { get; set; }
+
+        [Column("NgayThem")]
+        public DateTime NgayThem { get; set; }
+
+        // Navigation properties
+        [ForeignKey("MaGH")]
+        public virtual GioHang? GioHang { get; set; }
+
+        [ForeignKey("MaDT")]
+        public virtual DienThoai? DienThoai { get; set; }
+
+        // Computed property
+        public decimal ThanhTien => SoLuong * (DienThoai?.DonGia ?? 0);
+    }
+
+    // Enum cho trạng thái thanh toán
+    public enum TrangThaiThanhToan
+    {
+        ChoDuyet,
+        DaThanhToan,
+        ThatBai,
+        DaHuy
+    }
+
+    // Model cho thanh toán online
+    [Table("THANHTOANTRUCTUYEN")]
+    public class ThanhToanTrucTuyen
+    {
+        [Key]
+        [Column("MaThanhToan")]
+        [StringLength(50)]
+        public string MaThanhToan { get; set; } = string.Empty;
+
+        [Column("MaHD")]
+        [StringLength(10)]  // ← Sửa từ 20 thành 10 để khớp với HoaDon.MaHD
+        public string MaHD { get; set; } = string.Empty;
+
+        [Column("SoTien")]
+        public decimal SoTien { get; set; }
+
+        [Column("PhuongThucThanhToan")]
+        [StringLength(50)]
+        public string PhuongThucThanhToan { get; set; } = string.Empty; // VNPay, Momo, etc.
+
+        [Column("TrangThai")]
+        public TrangThaiThanhToan TrangThai { get; set; }
+
+        [Column("NgayTao")]
+        public DateTime NgayTao { get; set; }
+
+        [Column("NgayCapNhat")]
+        public DateTime? NgayCapNhat { get; set; }
+
+        [Column("MaGiaoDichNganHang")]
+        [StringLength(100)]
+        public string? MaGiaoDichNganHang { get; set; }
+
+        [Column("ThongTinThem")]
+        public string? ThongTinThem { get; set; }
+
+        // Navigation properties
+        [ForeignKey("MaHD")]
+        public virtual HoaDon? HoaDon { get; set; }
+    }
 }

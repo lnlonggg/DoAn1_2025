@@ -51,8 +51,25 @@
                         {
                             @if (User.HasClaim("VaiTro", "admin") || User.HasClaim("VaiTro", "nhanvien"))
                             {
-                                <li class="nav-item">
+                                @* <li class="nav-item">
                                     <a class="nav-link" asp-controller="DienThoai" asp-action="Index">Sản phẩm</a>
+                                </li> *@
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                                        🔧 Quản lý
+                                    </a>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" asp-controller="DienThoai" asp-action="Index">📱 Sản phẩm</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Admin" asp-action="QuanLyHoaDon">📋 Đơn hàng</a></li>
+                                        <li><a class="dropdown-item" asp-controller="Admin" asp-action="XacNhanThanhToan">💳 Xác nhận thanh toán</a></li>
+                    
+                                        @if (User.HasClaim("VaiTro", "admin"))
+                                        {
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li><a class="dropdown-item" asp-controller="Admin" asp-action="QuanLyNguoiDung">👥 Người dùng</a></li>
+                                            <li><a class="dropdown-item" asp-controller="Admin" asp-action="BaoCaoChiTiet">📊 Báo cáo</a></li>
+                                        }
+                                    </ul>
                                 </li>
                             }
                             @if (User.HasClaim("VaiTro", "khach"))

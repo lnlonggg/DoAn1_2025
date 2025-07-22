@@ -52,7 +52,7 @@ namespace QL_CuaHangDienThoai.Controllers
         }
 
         // GET: DienThoai/Create
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = "StaffOnly")]
         public IActionResult Create()
         {
             return View();
@@ -61,7 +61,7 @@ namespace QL_CuaHangDienThoai.Controllers
         // POST: DienThoai/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = "StaffOnly")]
         public async Task<IActionResult> Create(CreateProductViewModel model)
         {
             if (ModelState.IsValid)
@@ -91,7 +91,7 @@ namespace QL_CuaHangDienThoai.Controllers
                 {
                     MaDT = model.MaDT,
                     TenDT = model.TenDT,
-                    DonGia = model.DonGia,  // ← Đã sửa từ DonGia
+                    DonGia = model.DonGia,
                     SoLuongTon = model.SoLuongTon
                 };
 
@@ -105,7 +105,7 @@ namespace QL_CuaHangDienThoai.Controllers
         }
 
         // GET: DienThoai/Edit/5
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = "StaffOnly")]
         public async Task<IActionResult> Edit(string id)
         {
             if (id == null)
@@ -134,7 +134,7 @@ namespace QL_CuaHangDienThoai.Controllers
         // POST: DienThoai/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Policy = "AdminOnly")]
+        [Authorize(Policy = "StaffOnly")]
         public async Task<IActionResult> Edit(string id, EditProductViewModel model)
         {
             if (id != model.MaDT)

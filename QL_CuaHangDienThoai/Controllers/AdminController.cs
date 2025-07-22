@@ -6,7 +6,7 @@ using QL_CuaHangDienThoai.Models;
 
 namespace QL_CuaHangDienThoai.Controllers
 {
-    [Authorize(Policy = "AdminOnly")]
+    [Authorize(Policy = "StaffOnly")]
     public class AdminController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -24,7 +24,7 @@ namespace QL_CuaHangDienThoai.Controllers
             ViewBag.TongHoaDon = await _context.HoaDons.CountAsync();
             ViewBag.TongDoanhThu = await _context.HoaDons.SumAsync(h => h.TongTien);
 
-            // Sản phẩm bán chạy - sửa lỗi ThanhTien
+            // Sản phẩm bán chạy
             var sanPhamBanChay = await (from ct in _context.ChiTietHoaDons
                                         join dt in _context.DienThoais on ct.MaDT equals dt.MaDT
                                         group ct by new { ct.MaDT, dt.TenDT } into g
@@ -34,7 +34,7 @@ namespace QL_CuaHangDienThoai.Controllers
                                             MaDT = g.Key.MaDT,
                                             TenDT = g.Key.TenDT,
                                             SoLuongBan = g.Sum(x => x.SoLuong),
-                                            DoanhThu = g.Sum(x => x.SoLuong * x.DonGia) // Sử dụng SoLuong * DonGia thay vì ThanhTien
+                                            DoanhThu = g.Sum(x => x.SoLuong * x.DonGia)
                                         }).Take(5).ToListAsync();
 
             ViewBag.SanPhamBanChay = sanPhamBanChay;
@@ -45,6 +45,7 @@ namespace QL_CuaHangDienThoai.Controllers
             return View();
         }
 
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> QuanLyNguoiDung()
         {
             var users = await _context.TaiKhoans
@@ -57,6 +58,7 @@ namespace QL_CuaHangDienThoai.Controllers
             return View(users);
         }
 
+        [Authorize(Policy = "StaffOnly")]
         public async Task<IActionResult> QuanLyHoaDon()
         {
             var orders = await _context.HoaDons
@@ -69,6 +71,7 @@ namespace QL_CuaHangDienThoai.Controllers
             return View(orders);
         }
 
+        [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> BaoCaoChiTiet()
         {
             var fromDate = DateTime.Today.AddDays(-30); // 30 ngày trước
@@ -164,6 +167,8 @@ namespace QL_CuaHangDienThoai.Controllers
         }
 
         // Xem danh sách thanh toán chờ xác nhận
+
+        [Authorize(Policy = "StaffOnly")]
         public async Task<IActionResult> XacNhanThanhToan()
         {
             var pendingPayments = await _context.ThanhToanTrucTuyens

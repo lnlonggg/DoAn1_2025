@@ -25,10 +25,15 @@ namespace QL_CuaHangDienThoai.Controllers
 
                 switch (vaiTro)
                 {
+                    //case "admin":
+                    //    return RedirectToAction("Index", "Admin");
+                    //case "nhanvien":
+                    //    return RedirectToAction("Index", "DienThoai");
+                    //default:
+                    //    break;
                     case "admin":
+                    case "nhanvien":  // ← Thêm nhân viên cũng vào Admin dashboard
                         return RedirectToAction("Index", "Admin");
-                    case "nhanvien":
-                        return RedirectToAction("Index", "DienThoai");
                     default:
                         break;
                 }

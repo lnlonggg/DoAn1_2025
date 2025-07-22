@@ -2,10 +2,24 @@
     ViewData["Title"] = "Dashboard Admin";
 }
 
-<div class="row mb-4">
+@* <div class="row mb-4">
     <div class="col-12">
         <h2>📊 Dashboard Quản Trị</h2>
         <p class="text-muted">Tổng quan hoạt động kinh doanh của cửa hàng</p>
+    </div>
+</div> *@
+<div class="row mb-4">
+    <div class="col-12">
+        @if (User.HasClaim("VaiTro", "admin"))
+        {
+            <h2>📊 Dashboard Quản Trị</h2>
+            <p class="text-muted">Tổng quan hoạt động kinh doanh của cửa hàng</p>
+        }
+        else
+        {
+            <h2>👨‍💼 Dashboard Nhân Viên</h2>
+            <p class="text-muted">Quản lý sản phẩm và đơn hàng</p>
+        }
     </div>
 </div>
 
@@ -40,6 +54,42 @@
             <div class="card-body text-center">
                 <h2>@(((decimal)ViewBag.TongDoanhThu).ToString("C0"))</h2>
                 <p class="mb-0">💰 Doanh thu</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions - Phân quyền theo vai trò -->
+<div class="col-lg-6 mb-4">
+    <div class="card">
+        <div class="card-header">
+            <h5>⚡ Thao tác nhanh</h5>
+        </div>
+        <div class="card-body">
+            <div class="d-grid gap-2">
+                <a asp-controller="DienThoai" asp-action="Index" class="btn btn-outline-primary">
+                    📱 Quản lý sản phẩm
+                </a>
+                <a asp-action="QuanLyHoaDon" class="btn btn-outline-warning">
+                    📄 Quản lý đơn hàng
+                </a>
+                <a asp-action="XacNhanThanhToan" class="btn btn-outline-success">
+                    💳 Xác nhận thanh toán (@(ViewBag.PendingPayments ?? 0))
+                </a>
+                @* <a asp-action="SettingsQR" class="btn btn-outline-info">
+                    ⚙️ Cài đặt QR Code
+                </a> *@
+
+                @if (User.HasClaim("VaiTro", "admin"))
+                {
+                    <hr />
+                    <a asp-action="QuanLyNguoiDung" class="btn btn-outline-secondary">
+                        👥 Quản lý người dùng
+                    </a>
+                    <a asp-action="BaoCaoChiTiet" class="btn btn-outline-primary">
+                        📊 Báo cáo chi tiết
+                    </a>
+                }
             </div>
         </div>
     </div>

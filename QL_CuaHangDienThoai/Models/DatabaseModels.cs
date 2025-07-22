@@ -242,7 +242,7 @@ namespace QL_CuaHangDienThoai.Models
         public string MaThanhToan { get; set; } = string.Empty;
 
         [Column("MaHD")]
-        [StringLength(10)]  // ← Sửa từ 20 thành 10 để khớp với HoaDon.MaHD
+        [StringLength(10)] 
         public string MaHD { get; set; } = string.Empty;
 
         [Column("SoTien")]

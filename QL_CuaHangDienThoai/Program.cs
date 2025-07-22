@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using QL_CuaHangDienThoai.Data;
+using QL_CuaHangDienThoai.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +10,9 @@ builder.Services.AddControllersWithViews();
 // Add Entity Framework
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// Add VnPayHelper 
+builder.Services.AddScoped<VnPayHelper>();
 
 // Add Authentication
 builder.Services.AddAuthentication("Cookies")

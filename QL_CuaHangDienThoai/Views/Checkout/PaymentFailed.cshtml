@@ -1,0 +1,83 @@
+﻿@model QL_CuaHangDienThoai.Models.ThanhToanTrucTuyen
+@{
+    ViewData["Title"] = "Thanh toán thất bại";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card border-danger">
+            <div class="card-header bg-danger text-white text-center">
+                <h4>❌ Thanh toán thất bại</h4>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-4">
+                    <i class="fas fa-times-circle fa-5x text-danger mb-3"></i>
+                    <h5>Rất tiếc! Thanh toán không thành công</h5>
+                    <p class="text-muted">Giao dịch của bạn đã bị hủy hoặc có lỗi xảy ra trong quá trình thanh toán.</p>
+                </div>
+
+                @if (Model != null)
+                {
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h6>📋 Thông tin giao dịch</h6>
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td><strong>Mã đơn hàng:</strong></td>
+                                    <td><span class="badge bg-primary">@Model.MaHD</span></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Mã thanh toán:</strong></td>
+                                    <td>@Model.MaThanhToan</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Số tiền:</strong></td>
+                                    <td><strong>@Model.SoTien.ToString("C0")</strong></td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Phương thức:</strong></td>
+                                    <td>@Model.PhuongThucThanhToan</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Trạng thái:</strong></td>
+                                    <td><span class="badge bg-danger">Thất bại</span></td>
+                                </tr>
+                                @if (!string.IsNullOrEmpty(Model.ThongTinThem))
+                                {
+                                    <tr>
+                                        <td><strong>Lý do:</strong></td>
+                                        <td class="text-danger">@Model.ThongTinThem</td>
+                                    </tr>
+                                }
+                            </table>
+                        </div>
+                    </div>
+                }
+
+                <div class="alert alert-warning">
+                    <h6>💡 Bạn có thể:</h6>
+                    <ul class="mb-0">
+                        <li>Thử thanh toán lại với phương thức khác</li>
+                        <li>Kiểm tra số dư tài khoản ngân hàng</li>
+                        <li>Liên hệ ngân hàng của bạn để được hỗ trợ</li>
+                        <li>Chọn thanh toán khi nhận hàng (COD)</li>
+                    </ul>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                    <a asp-controller="Cart" asp-action="Index" class="btn btn-outline-secondary">
+                        ⬅️ Quay lại giỏ hàng
+                    </a>
+                    <div>
+                        <a asp-controller="Checkout" asp-action="Index" class="btn btn-primary">
+                            🔄 Thử thanh toán lại
+                        </a>
+                        <a asp-controller="Home" asp-action="Index" class="btn btn-outline-primary">
+                            🏠 Về trang chủ
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

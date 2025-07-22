@@ -1,0 +1,227 @@
+﻿@using QL_CuaHangDienThoai.Helpers
+@model QL_CuaHangDienThoai.Models.HoaDon
+@{
+    ViewData["Title"] = "Thanh toán QR Code";
+    var payment = ViewBag.Payment as QL_CuaHangDienThoai.Models.ThanhToanTrucTuyen;
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-10">
+        <div class="card">
+            <div class="card-header bg-info text-white text-center">
+                <h4>📱 Thanh toán bằng QR Code</h4>
+            </div>
+            <div class="card-body">
+                <!-- Status indicator -->
+                <div class="text-center mb-4">
+                    <div id="payment-status" class="alert alert-warning">
+                        <i class="fas fa-clock fa-spin me-2"></i>
+                        <strong>Đang chờ thanh toán...</strong>
+                        <p class="mb-0">Vui lòng chuyển khoản theo thông tin bên dưới</p>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <!-- QR Code -->
+                    <div class="col-md-6 text-center">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6>📷 Quét mã QR</h6>
+                            </div>
+                            <div class="card-body">
+                                <!-- QR Code placeholder - Bạn cần thay thế bằng QR thực -->
+                                <div id="qr-code" class="mb-3">
+                                    <img src="~/images/qr-codes/bank-qr.jpg"
+                                         alt="QR Code Chuyển khoản"
+                                         class="img-fluid border rounded"
+                                         style="max-width: 200px;" />
+                                </div>
+                                <small class="text-muted">Quét mã QR bằng app ngân hàng của bạn</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Thông tin chuyển khoản -->
+                    <div class="col-md-6">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6>🏦 Thông tin chuyển khoản</h6>
+                            </div>
+                            <div class="card-body">
+                                <table class="table table-borderless">
+                                    <tr>
+                                        <td><strong>Ngân hàng:</strong></td>
+                                        <td>MB Bank</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Số tài khoản:</strong></td>
+                                        <td>
+                                            <span id="account-number">8889709999</span>
+                                            <button class="btn btn-sm btn-outline-secondary ms-2" onclick="copyText('18889709999')">
+                                                📋 Copy
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Chủ tài khoản:</strong></td>
+                                        <td>LÝ NGỌC LONG</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Số tiền:</strong></td>
+                                        <td>
+                                            <strong class="text-success">@Model.TongTien.ToString("C0")</strong>
+                                            <button class="btn btn-sm btn-outline-secondary ms-2" onclick="copyText('@Model.TongTien.ToString("F0")')">
+                                                📋 Copy
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Nội dung CK:</strong></td>
+                                        <td>
+                                            <span id="transfer-content">@Model.MaHD</span>
+                                            <button class="btn btn-sm btn-outline-secondary ms-2" onclick="copyText('@Model.MaHD')">
+                                                📋 Copy
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </table>
+
+                                <div class="alert alert-info">
+                                    <small>
+                                        <strong>⚠️ Lưu ý quan trọng:</strong><br>
+                                        - Vui lòng chuyển khoản <strong>chính xác</strong> số tiền<br>
+                                        - Ghi đúng nội dung: <strong>@Model.MaHD</strong><br>
+                                        - Đơn hàng sẽ được xác nhận sau 5-10 phút
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Thông tin đơn hàng -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-header">
+                                <h6>📋 Chi tiết đơn hàng #@Model.MaHD</h6>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    @foreach (var item in Model.ChiTietHoaDons)
+                                    {
+                                        <div class="col-md-6 mb-2">
+                                            <div class="d-flex align-items-center">
+                                                <img src="@ImageHelper.GetProductImage(item.MaDT)"
+                                                     alt="@item.DienThoai?.TenDT"
+                                                     class="me-3 rounded"
+                                                     style="width: 50px; height: 50px; object-fit: contain; background: #f8f9fa;" />
+                                                <div>
+                                                    <h6 class="mb-1">@item.DienThoai?.TenDT</h6>
+                                                    <small class="text-muted">
+                                                        @item.SoLuong x @item.DonGia.ToString("C0") =
+                                                        <strong>@item.ThanhTien.ToString("C0")</strong>
+                                                    </small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action buttons -->
+                <div class="text-center mt-4">
+                    <button class="btn btn-success" onclick="checkPaymentStatus()">
+                        🔄 Kiểm tra thanh toán
+                    </button>
+                    <a asp-controller="DonHang" asp-action="MyOrders" class="btn btn-outline-info">
+                        📋 Đơn hàng của tôi
+                    </a>
+                    <a asp-controller="Shop" asp-action="Index" class="btn btn-outline-secondary">
+                        🛍️ Tiếp tục mua sắm
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let checkInterval;
+
+        $(document).ready(function() {
+            // Auto check payment status every 30 seconds
+            checkInterval = setInterval(checkPaymentStatus, 30000);
+        });
+
+        function checkPaymentStatus() {
+            $.get('/Checkout/CheckPaymentStatus', { orderId: '@Model.MaHD' })
+            .done(function(response) {
+                const statusDiv = $('#payment-status');
+
+                        if (response.status === 'DaThanhToan') {
+            statusDiv.removeClass('alert-warning')
+                   .addClass('alert-success')
+                   .html(`
+                       <i class="fas fa-check-circle me-2"></i>
+                       <strong>Thanh toán đã được xác nhận!</strong>
+                       <p class="mb-0">Admin đã xác nhận thanh toán. Đơn hàng đang được xử lý.</p>
+                   `);
+            clearInterval(checkInterval);
+
+            // Redirect after 3 seconds
+            setTimeout(() => {
+                window.location.href = '/Checkout/OrderSuccess/@Model.MaHD';
+            }, 3000);
+
+        } else if (response.status === 'ThatBai' || response.status === 'DaHuy') {
+            statusDiv.removeClass('alert-warning')
+                   .addClass('alert-danger')
+                   .html(`
+                       <i class="fas fa-times-circle me-2"></i>
+                       <strong>Thanh toán bị từ chối!</strong>
+                       <p class="mb-0">Admin đã từ chối xác nhận thanh toán này.</p>
+                   `);
+            clearInterval(checkInterval);
+
+        } else if (response.status === 'ChoDuyet') {
+            statusDiv.html(`
+                <i class="fas fa-clock fa-spin me-2"></i>
+                <strong>Đang chờ admin xác nhận...</strong>
+                <p class="mb-0">Vui lòng chuyển khoản và chờ admin kiểm tra xác nhận</p>
+            `);
+        }
+            });
+        }
+
+        function copyText(text) {
+            navigator.clipboard.writeText(text).then(function() {
+                // Show toast notification
+                showToast('Đã copy: ' + text, 'success');
+            });
+        }
+
+        function showToast(message, type) {
+            const toast = $(`
+                <div class="toast align-items-center text-bg-${type === 'success' ? 'success' : 'danger'} border-0" role="alert">
+                    <div class="d-flex">
+                        <div class="toast-body">${message}</div>
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                    </div>
+                </div>
+            `);
+
+            if ($('#toast-container').length === 0) {
+                $('body').append('<div id="toast-container" class="toast-container position-fixed bottom-0 end-0 p-3"></div>');
+            }
+
+            $('#toast-container').append(toast);
+            var bsToast = new bootstrap.Toast(toast[0]);
+            bsToast.show();
+        }
+    </script>
+}

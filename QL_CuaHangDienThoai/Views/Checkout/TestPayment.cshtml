@@ -1,0 +1,36 @@
+﻿@{
+    ViewData["Title"] = "Test VNPay";
+}
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>🧪 Test VNPay Payment</h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <strong>Thông tin test VNPay:</strong><br>
+                        - Thẻ test: 9704198526191432198<br>
+                        - Tên: NGUYEN VAN A<br>
+                        - Ngày hết hạn: 07/15<br>
+                        - OTP: 123456
+                    </div>
+
+                    <form method="post" action="/Checkout/CreateTestPayment">
+                        <div class="mb-3">
+                            <label>Số tiền (VNĐ):</label>
+                            <input type="number" name="amount" value="100000" class="form-control" />
+                        </div>
+                        <div class="mb-3">
+                            <label>Mô tả:</label>
+                            <input type="text" name="description" value="Test payment" class="form-control" />
+                        </div>
+                        <button type="submit" class="btn btn-primary">Tạo payment test</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

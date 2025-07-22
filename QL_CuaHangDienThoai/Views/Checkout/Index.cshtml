@@ -1,0 +1,349 @@
+﻿@model QL_CuaHangDienThoai.ViewModels.CheckoutViewModel
+@{
+    ViewData["Title"] = "Thanh toán";
+}
+
+<div class="row mb-4">
+    <div class="col-12">
+        <h2>💳 Thanh toán</h2>
+        <p class="text-muted">Vui lòng kiểm tra thông tin và chọn phương thức thanh toán</p>
+    </div>
+</div>
+
+<!-- Loading overlay -->
+<div id="loading-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999;">
+    <div class="d-flex justify-content-center align-items-center h-100">
+        <div class="text-center text-white">
+            <div class="spinner-border mb-3" role="status" style="width: 3rem; height: 3rem;"></div>
+            <h5>Đang xử lý đơn hàng...</h5>
+            <p>Vui lòng không tắt trình duyệt</p>
+        </div>
+    </div>
+</div>
+
+<form asp-action="Index" method="post" id="checkout-form">
+    <div class="row">
+        <!-- Thông tin giao hàng -->
+        <div class="col-lg-7">
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">📍 Thông tin giao hàng</h5>
+                </div>
+                <div class="card-body">
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="HoTenNguoiNhan" class="form-label"><strong>Họ và tên *</strong></label>
+                            <input asp-for="HoTenNguoiNhan" class="form-control form-control-lg" placeholder="Nhập họ và tên đầy đủ" />
+                            <span asp-validation-for="HoTenNguoiNhan" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="SoDienThoai" class="form-label"><strong>Số điện thoại *</strong></label>
+                            <input asp-for="SoDienThoai" class="form-control form-control-lg" placeholder="0xxxxxxxxx" />
+                            <span asp-validation-for="SoDienThoai" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="DiaChiGiaoHang" class="form-label"><strong>Địa chỉ giao hàng *</strong></label>
+                        <textarea asp-for="DiaChiGiaoHang" class="form-control" rows="3" placeholder="Số nhà, tên đường, phường/xã, quận/huyện, tỉnh/thành phố"></textarea>
+                        <span asp-validation-for="DiaChiGiaoHang" class="text-danger"></span>
+                        <div class="form-text">💡 Vui lòng nhập địa chỉ chi tiết để giao hàng chính xác</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="GhiChu" class="form-label">Ghi chú đặc biệt</label>
+                        <textarea asp-for="GhiChu" class="form-control" rows="2" placeholder="Ví dụ: Gọi trước khi giao, giao sau 6h chiều..."></textarea>
+                        <div class="form-text">📝 Thông tin này sẽ giúp shipper giao hàng thuận tiện hơn</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Phương thức thanh toán -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">💰 Phương thức thanh toán</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="payment-option form-check mb-3 p-3 border rounded">
+                            <input class="form-check-input" type="radio" asp-for="PhuongThucThanhToan" value="COD" id="cod" checked />
+                            <label class="form-check-label w-100" for="cod">
+                                <div class="d-flex align-items-center">
+                                    <div class="payment-icon me-3">💵</div>
+                                    <div>
+                                        <strong>Thanh toán khi nhận hàng (COD)</strong><br>
+                                        <small class="text-muted">Thanh toán bằng tiền mặt khi shipper giao hàng đến địa chỉ</small>
+                                    </div>
+                                </div>
+                                <div id="cod-info" class="mt-2 p-2 bg-light rounded" style="display: none;">
+                                    <small class="text-success">
+                                        <i class="fas fa-check-circle me-1"></i>
+                                        <strong>Ưu điểm:</strong> An toàn, kiểm tra hàng trước khi thanh toán<br>
+                                        <i class="fas fa-info-circle me-1"></i>
+                                        <strong>Lưu ý:</strong> Vui lòng chuẩn bị đủ tiền mặt
+                                    </small>
+                                </div>
+                            </label>
+                        </div>
+
+                        <div class="payment-option form-check mb-3 p-3 border rounded">
+                            <input class="form-check-input" type="radio" asp-for="PhuongThucThanhToan" value="VNPay" id="vnpay" />
+                            <label class="form-check-label w-100" for="vnpay">
+                                <div class="d-flex align-items-center">
+                                    <div class="payment-icon me-3">🏦</div>
+                                    <div>
+                                        <strong>Thanh toán online VNPay</strong><br>
+                                        <small class="text-muted">ATM, Internet Banking, QR Code, Ví điện tử</small>
+                                    </div>
+                                </div>
+                                <div id="vnpay-info" class="mt-2 p-2 bg-light rounded" style="display: none;">
+                                    <small class="text-primary">
+                                        <i class="fas fa-shield-alt me-1"></i>
+                                        <strong>Bảo mật:</strong> Mã hóa SSL 256-bit, an toàn tuyệt đối<br>
+                                        <i class="fas fa-rocket me-1"></i>
+                                        <strong>Nhanh chóng:</strong> Xử lý tự động, giao hàng ngay khi thanh toán thành công
+                                    </small>
+                                </div>
+                            </label>
+                        </div>
+
+                        <div class="payment-option form-check mb-3 p-3 border rounded">
+                            <input class="form-check-input" type="radio" asp-for="PhuongThucThanhToan" value="QR" id="qr" />
+                            <label class="form-check-label w-100" for="qr">
+                                <div class="d-flex align-items-center">
+                                    <div class="payment-icon me-3">📱</div>
+                                    <div>
+                                        <strong>Chuyển khoản QR Code</strong><br>
+                                        <small class="text-muted">Quét mã QR để chuyển khoản trực tiếp</small>
+                                    </div>
+                                </div>
+                                <div id="qr-info" class="mt-2 p-2 bg-light rounded" style="display: none;">
+                                    <small class="text-info">
+                                        <i class="fas fa-qrcode me-1"></i>
+                                        <strong>Tiện lợi:</strong> Quét QR bằng app ngân hàng, chuyển khoản tức thì<br>
+                                        <i class="fas fa-clock me-1"></i>
+                                        <strong>Xác nhận:</strong> Đơn hàng sẽ được xác nhận sau khi kiểm tra chuyển khoản
+                                    </small>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                    <span asp-validation-for="PhuongThucThanhToan" class="text-danger"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tóm tắt đơn hàng -->
+        <div class="col-lg-5">
+            <div class="card shadow-sm sticky-top" style="top: 20px;">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">📋 Tóm tắt đơn hàng</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Danh sách sản phẩm -->
+                    <div class="mb-3">
+                        @foreach (var item in Model.Cart.Items)
+                        {
+                            <div class="d-flex justify-content-between align-items-start mb-3 pb-2 border-bottom">
+                                <div class="flex-grow-1 me-3">
+                                    <h6 class="mb-1">@item.TenDT</h6>
+                                    <small class="text-muted">@item.SoLuong × @item.DonGia.ToString("C0")</small>
+                                </div>
+                                <strong class="text-success">@item.ThanhTien.ToString("C0")</strong>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Tính toán chi tiết -->
+                    <div class="bg-light p-3 rounded mb-3">
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Tạm tính (@Model.Cart.TongSoLuong sản phẩm):</span>
+                            <span>@Model.Cart.TongTien.ToString("C0")</span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Phí vận chuyển:</span>
+                            <span class="text-success">
+                                <s class="text-muted">30.000 ₫</s> Miễn phí
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <span>Giảm giá:</span>
+                            <span class="text-success">0 ₫</span>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between">
+                            <strong class="fs-5">Tổng cộng:</strong>
+                            <strong class="text-success fs-4">@Model.Cart.TongTien.ToString("C0")</strong>
+                        </div>
+                    </div>
+
+                    <!-- Action buttons -->
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-success btn-lg" id="submit-btn">
+                            <i class="fas fa-credit-card me-2"></i>Hoàn tất đặt hàng
+                        </button>
+                        <a asp-controller="Cart" asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Quay lại giỏ hàng
+                        </a>
+                    </div>
+
+                    <!-- Trust badges -->
+                    <div class="mt-3 pt-3 border-top text-center">
+                        <small class="text-muted d-block mb-2">
+                            <i class="fas fa-lock text-success me-1"></i>Thông tin được bảo mật SSL
+                        </small>
+                        <small class="text-muted d-block mb-2">
+                            <i class="fas fa-shipping-fast text-primary me-1"></i>Giao hàng nhanh toàn quốc
+                        </small>
+                        <small class="text-muted d-block">
+                            <i class="fas fa-undo text-warning me-1"></i>Đổi trả miễn phí trong 7 ngày
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+        $(document).ready(function() {
+            // Hiệu ứng chọn phương thức thanh toán
+            $('input[name="PhuongThucThanhToan"]').change(function() {
+                // Reset all payment options
+                $('.payment-option').removeClass('border-primary bg-light');
+                $('.payment-option .payment-icon').removeClass('payment-selected');
+                $('#cod-info, #vnpay-info').slideUp(200);
+
+                // Highlight selected option
+                var selectedOption = $(this).closest('.payment-option');
+                selectedOption.addClass('border-primary bg-light');
+                selectedOption.find('.payment-icon').addClass('payment-selected');
+
+                // Show relevant info
+                if ($(this).val() === 'VNPay') {
+                    $('#vnpay-info').slideDown(300);
+                    $('#submit-btn').html('<i class="fas fa-external-link-alt me-2"></i>Chuyển đến VNPay');
+                 } else if ($(this).val() === 'QR') {
+                    $('#qr-info').slideDown(300);
+                    $('#submit-btn').html('<i class="fas fa-qrcode me-2"></i>Hiển thị QR Code');
+                } else {
+                    $('#cod-info').slideDown(300);
+                    $('#submit-btn').html('<i class="fas fa-credit-card me-2"></i>Hoàn tất đặt hàng');
+                }
+            });
+
+            // Mặc định chọn COD
+            $('#cod').trigger('change');
+
+            // Form validation và loading
+            $('#checkout-form').on('submit', function(e) {
+                // Basic validation
+                var isValid = true;
+                var requiredFields = ['HoTenNguoiNhan', 'SoDienThoai', 'DiaChiGiaoHang'];
+
+                requiredFields.forEach(function(field) {
+                    var input = $(`input[name="${field}"], textarea[name="${field}"]`);
+                    if (!input.val().trim()) {
+                        input.addClass('is-invalid');
+                        isValid = false;
+                    } else {
+                        input.removeClass('is-invalid');
+                    }
+                });
+
+                if (!isValid) {
+                    e.preventDefault();
+                    $('html, body').animate({
+                        scrollTop: $('.is-invalid').first().offset().top - 100
+                    }, 500);
+                    return false;
+                }
+
+                // Show loading
+                $('#loading-overlay').fadeIn(200);
+                $('#submit-btn').prop('disabled', true);
+
+                // Prevent double submit
+                setTimeout(() => {
+                    $('#submit-btn').prop('disabled', false);
+                    $('#loading-overlay').fadeOut(200);
+                }, 30000); // Auto hide after 30s
+            });
+
+            // Real-time validation
+            $('input[required], textarea[required]').on('blur', function() {
+                if ($(this).val().trim()) {
+                    $(this).removeClass('is-invalid').addClass('is-valid');
+                } else {
+                    $(this).removeClass('is-valid').addClass('is-invalid');
+                }
+            });
+
+            // Phone number formatting
+            $('input[name="SoDienThoai"]').on('input', function() {
+                var phone = $(this).val().replace(/\D/g, '');
+                if (phone.length > 10) phone = phone.substring(0, 10);
+                $(this).val(phone);
+            });
+        });
+    </script>
+}
+
+<style>
+    .payment-option {
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+
+        .payment-option:hover {
+            background-color: #f8f9fa !important;
+            border-color: #dee2e6 !important;
+        }
+
+        .payment-option.border-primary {
+            border-color: #0d6efd !important;
+            background-color: rgba(13, 110, 253, 0.05) !important;
+        }
+
+    .payment-icon {
+        font-size: 1.5rem;
+        transition: transform 0.3s ease;
+    }
+
+        .payment-icon.payment-selected {
+            transform: scale(1.2);
+        }
+
+    .form-control:focus {
+        border-color: #0d6efd;
+        box-shadow: 0 0 0 0.2rem rgba(13, 110, 253, 0.25);
+    }
+
+    .is-invalid {
+        border-color: #dc3545 !important;
+        background-color: rgba(220, 53, 69, 0.05) !important;
+    }
+
+    .is-valid {
+        border-color: #198754 !important;
+        background-color: rgba(25, 135, 84, 0.05) !important;
+    }
+</style>
+
+<!-- Responsive CSS -->
+<style>
+    /* Mobile responsive */
+    @@media (max-width: 991px) {
+        .sticky-top {
+            position: relative !important;
+            top: auto !important;
+        }
+    }
+</style>

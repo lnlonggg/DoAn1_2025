@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QL_CuaHangDienThoai.Data;
+using QL_CuaHangDienThoai.Models;
 
 namespace QL_CuaHangDienThoai.Controllers
 {
@@ -37,6 +38,9 @@ namespace QL_CuaHangDienThoai.Controllers
                                         }).Take(5).ToListAsync();
 
             ViewBag.SanPhamBanChay = sanPhamBanChay;
+            // Thêm đếm pending payments
+            ViewBag.PendingPayments = await _context.ThanhToanTrucTuyens
+            .CountAsync(p => p.TrangThai == TrangThaiThanhToan.ChoDuyet);
 
             return View();
         }
@@ -158,5 +162,65 @@ namespace QL_CuaHangDienThoai.Controllers
 
             return View();
         }
+
+        // Xem danh sách thanh toán chờ xác nhận
+        public async Task<IActionResult> XacNhanThanhToan()
+        {
+            var pendingPayments = await _context.ThanhToanTrucTuyens
+                .Include(p => p.HoaDon)
+                .ThenInclude(h => h.KhachHang)
+                .Include(p => p.HoaDon.ChiTietHoaDons)
+                .ThenInclude(ct => ct.DienThoai)
+                .Where(p => p.TrangThai == TrangThaiThanhToan.ChoDuyet)
+                .OrderByDescending(p => p.NgayTao)
+                .ToListAsync();
+
+            return View(pendingPayments);
+        }
+
+        // Xác nhận thanh toán thành công
+        [HttpPost]
+        public async Task<IActionResult> ApprovePayment(string paymentId)
+        {
+            var payment = await _context.ThanhToanTrucTuyens
+                .FirstOrDefaultAsync(p => p.MaThanhToan == paymentId);
+
+            if (payment != null)
+            {
+                payment.TrangThai = TrangThaiThanhToan.DaThanhToan;
+                payment.NgayCapNhat = DateTime.Now;
+                payment.ThongTinThem += $" - Được xác nhận bởi {User.Identity.Name} lúc {DateTime.Now:dd/MM/yyyy HH:mm}";
+
+                _context.Update(payment);
+                await _context.SaveChangesAsync();
+
+                TempData["SuccessMessage"] = "Đã xác nhận thanh toán thành công!";
+            }
+
+            return RedirectToAction("XacNhanThanhToan");
+        }
+
+        // Từ chối thanh toán
+        [HttpPost]
+        public async Task<IActionResult> RejectPayment(string paymentId, string reason)
+        {
+            var payment = await _context.ThanhToanTrucTuyens
+                .FirstOrDefaultAsync(p => p.MaThanhToan == paymentId);
+
+            if (payment != null)
+            {
+                payment.TrangThai = TrangThaiThanhToan.ThatBai;
+                payment.NgayCapNhat = DateTime.Now;
+                payment.ThongTinThem += $" - Bị từ chối bởi {User.Identity.Name} lúc {DateTime.Now:dd/MM/yyyy HH:mm}. Lý do: {reason}";
+
+                _context.Update(payment);
+                await _context.SaveChangesAsync();
+
+                TempData["SuccessMessage"] = "Đã từ chối thanh toán!";
+            }
+
+            return RedirectToAction("XacNhanThanhToan");
+        }
+
     }
 }

@@ -1,0 +1,142 @@
+﻿@using QL_CuaHangDienThoai.Helpers
+@model IEnumerable<QL_CuaHangDienThoai.Models.ThanhToanTrucTuyen>
+@{
+    ViewData["Title"] = "Xác nhận thanh toán";
+}
+
+<div class="row mb-4">
+    <div class="col-md-8">
+        <h2>💳 Xác nhận thanh toán QR</h2>
+        <p class="text-muted">Danh sách các đơn hàng chờ xác nhận thanh toán chuyển khoản</p>
+    </div>
+    <div class="col-md-4 text-end">
+        <div class="alert alert-info p-2">
+            <strong>@Model.Count()</strong> đơn chờ xác nhận
+        </div>
+    </div>
+</div>
+
+@if (Model.Any())
+{
+    @foreach (var payment in Model)
+    {
+        <div class="card mb-3 border-warning">
+            <div class="card-header bg-warning text-dark">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <h6 class="mb-0">
+                            🔔 Đơn hàng: <span class="badge bg-primary">@payment.MaHD</span>
+                        </h6>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <small>
+                            📅 @payment.NgayTao.ToString("dd/MM/yyyy HH:mm")<br>
+                            💰 <strong>@payment.SoTien.ToString("C0")</strong>
+                        </small>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <h6>👤 Thông tin khách hàng</h6>
+                        <p class="mb-1"><strong>Tên:</strong> @payment.HoaDon?.KhachHang?.HoTen</p>
+                        <p class="mb-1"><strong>SĐT:</strong> @payment.HoaDon?.KhachHang?.SoDT</p>
+                        <p class="mb-0"><strong>Email:</strong> @payment.HoaDon?.KhachHang?.Email</p>
+                    </div>
+
+                    <div class="col-md-4">
+                        <h6>📦 Sản phẩm đã đặt</h6>
+                        @if (payment.HoaDon?.ChiTietHoaDons?.Any() == true)
+                        {
+                            @foreach (var item in payment.HoaDon.ChiTietHoaDons.Take(3))
+                            {
+                                <small class="d-block">• @item.DienThoai?.TenDT (x@item.SoLuong)</small>
+                            }
+                            @if (payment.HoaDon.ChiTietHoaDons.Count > 3)
+                            {
+                                <small class="text-muted">... và @(payment.HoaDon.ChiTietHoaDons.Count - 3) sản phẩm khác</small>
+                            }
+                        }
+                    </div>
+
+                    <div class="col-md-4">
+                        <h6>💳 Thông tin thanh toán</h6>
+                        <div class="alert alert-info p-2">
+                            <small>
+                                <strong>Nội dung CK:</strong> @payment.MaHD<br>
+                                <strong>Số tiền:</strong> @payment.SoTien.ToString("C0")<br>
+                                <strong>Phương thức:</strong> Chuyển khoản QR
+                            </small>
+                        </div>
+                    </div>
+                </div>
+
+                <hr />
+
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Kiểm tra tài khoản ngân hàng để xác nhận đã nhận tiền
+                        </small>
+                    </div>
+                    <div>
+                        <button class="btn btn-success me-2" onclick="approvePayment('@payment.MaThanhToan', '@payment.MaHD')">
+                            ✅ Xác nhận
+                        </button>
+                        <button class="btn btn-danger" onclick="rejectPayment('@payment.MaThanhToan', '@payment.MaHD')">
+                            ❌ Từ chối
+                        </button>
+                        <a href="/DonHang/Details/@payment.MaHD" class="btn btn-outline-info">
+                            👁️ Chi tiết
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+}
+else
+{
+    <div class="text-center py-5">
+        <i class="fas fa-check-circle fa-5x text-success mb-3"></i>
+        <h5 class="text-muted">Tất cả thanh toán đã được xử lý</h5>
+        <p class="text-muted">Không có đơn hàng nào đang chờ xác nhận thanh toán</p>
+        <a asp-action="Index" class="btn btn-primary">
+            📊 Về Dashboard
+        </a>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        function approvePayment(paymentId, orderId) {
+            if (confirm(`Xác nhận đã nhận được thanh toán cho đơn hàng ${orderId}?`)) {
+                $.post('/Admin/ApprovePayment', { paymentId: paymentId })
+                .done(function() {
+                    location.reload();
+                })
+                .fail(function() {
+                    alert('Có lỗi xảy ra. Vui lòng thử lại.');
+                });
+            }
+        }
+
+        function rejectPayment(paymentId, orderId) {
+            const reason = prompt(`Lý do từ chối thanh toán đơn hàng ${orderId}:`);
+            if (reason && reason.trim()) {
+                $.post('/Admin/RejectPayment', {
+                    paymentId: paymentId,
+                    reason: reason
+                })
+                .done(function() {
+                    location.reload();
+                })
+                .fail(function() {
+                    alert('Có lỗi xảy ra. Vui lòng thử lại.');
+                });
+            }
+        }
+    </script>
+}

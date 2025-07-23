@@ -1,6 +1,6 @@
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using QL_CuaHangDienThoai.Data;
-using QL_CuaHangDienThoai.Helpers;
+using QL_CuaHangDienThoai.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,8 +11,8 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Add VnPayHelper 
-builder.Services.AddScoped<VnPayHelper>();
+// Add VnPayService
+builder.Services.AddScoped<VnPayService>();
 
 // Add Authentication
 builder.Services.AddAuthentication("Cookies")
@@ -52,9 +52,7 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
 app.UseRouting();
-
 app.UseSession();
 app.UseAuthentication();
 app.UseAuthorization();

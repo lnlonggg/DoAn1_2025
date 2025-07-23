@@ -7,7 +7,7 @@ using QL_CuaHangDienThoai.ViewModels;
 
 namespace QL_CuaHangDienThoai.Controllers
 {
-    [Authorize(Policy = "AdminOnly")]  // Chỉ Admin
+    [Authorize(Policy = "AdminOnly")]  // Chỉ Admin mới có quyền truy cập
     public class AccountManagementController : Controller
     {
         private readonly ApplicationDbContext _context;

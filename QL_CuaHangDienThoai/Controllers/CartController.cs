@@ -18,7 +18,7 @@ namespace QL_CuaHangDienThoai.Controllers
             _context = context;
         }
 
-        // Xem giỏ hàng
+
         public async Task<IActionResult> Index()
         {
             var cart = await GetOrCreateCart();
@@ -26,7 +26,7 @@ namespace QL_CuaHangDienThoai.Controllers
             return View(cartViewModel);
         }
 
-        // Thêm sản phẩm vào giỏ hàng
+
         [HttpPost]
         public async Task<IActionResult> AddToCart(AddToCartViewModel model)
         {
@@ -52,7 +52,6 @@ namespace QL_CuaHangDienThoai.Controllers
 
             if (existingItem != null)
             {
-                // Cập nhật số lượng
                 var newQuantity = existingItem.SoLuong + model.SoLuong;
                 if (newQuantity > product.SoLuongTon)
                 {
@@ -63,7 +62,7 @@ namespace QL_CuaHangDienThoai.Controllers
             }
             else
             {
-                // Thêm mới
+ 
                 var cartItem = new ChiTietGioHang
                 {
                     MaGH = cart.MaGH,
@@ -76,7 +75,7 @@ namespace QL_CuaHangDienThoai.Controllers
 
             await _context.SaveChangesAsync();
 
-            // Đếm số lượng items trong giỏ
+
             var totalItems = await _context.ChiTietGioHangs
                 .Where(ct => ct.MaGH == cart.MaGH)
                 .SumAsync(ct => ct.SoLuong);
@@ -89,7 +88,6 @@ namespace QL_CuaHangDienThoai.Controllers
             });
         }
 
-        // Cập nhật số lượng
         [HttpPost]
         public async Task<IActionResult> UpdateQuantity(string maDT, int quantity)
         {
@@ -121,7 +119,6 @@ namespace QL_CuaHangDienThoai.Controllers
             return Json(new { success = true, itemTotal = newTotal });
         }
 
-        // Xóa sản phẩm khỏi giỏ hàng
         [HttpPost]
         public async Task<IActionResult> RemoveFromCart(string maDT)
         {
@@ -138,7 +135,7 @@ namespace QL_CuaHangDienThoai.Controllers
             return Json(new { success = true });
         }
 
-        // Xóa toàn bộ giỏ hàng
+
         [HttpPost]
         public async Task<IActionResult> ClearCart()
         {
@@ -153,7 +150,6 @@ namespace QL_CuaHangDienThoai.Controllers
             return Json(new { success = true });
         }
 
-        // Lấy số lượng items trong giỏ hàng (cho header)
         public async Task<IActionResult> GetCartCount()
         {
             var cart = await GetOrCreateCart();
@@ -164,7 +160,6 @@ namespace QL_CuaHangDienThoai.Controllers
             return Json(new { count });
         }
 
-        // Helper methods
         private async Task<GioHang> GetOrCreateCart()
         {
             var tenDangNhap = User.Identity.Name;

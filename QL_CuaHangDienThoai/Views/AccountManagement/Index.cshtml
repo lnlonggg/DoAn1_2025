@@ -15,7 +15,6 @@
     </div>
 </div>
 
-<!-- Thống kê nhanh -->
 <div class="row mb-4">
     <div class="col-md-3">
         <div class="card bg-primary text-white">
@@ -51,7 +50,6 @@
     </div>
 </div>
 
-<!-- Bộ lọc -->
 <div class="card mb-4">
     <div class="card-body">
         <div class="row">
@@ -77,7 +75,6 @@
     </div>
 </div>
 
-<!-- Danh sách tài khoản -->
 <div class="card">
     <div class="card-body">
         <div class="table-responsive">
@@ -189,7 +186,6 @@
 @section Scripts {
     <script>
         $(document).ready(function() {
-            // Bộ lọc theo vai trò
             $('#roleFilter').on('change', function() {
                 const selectedRole = $(this).val();
                 const rows = $('#accountsTable tbody tr');
@@ -202,7 +198,6 @@
                 }
             });
 
-            // Tìm kiếm
             $('#searchInput').on('keyup', function() {
                 const searchTerm = $(this).val().toLowerCase();
                 const rows = $('#accountsTable tbody tr');
@@ -217,7 +212,6 @@
                 });
             });
 
-            // Thay đổi vai trò
             $('.role-select').on('change', function() {
                 const username = $(this).data('username');
                 const newRole = $(this).val();

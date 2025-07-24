@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using QL_CuaHangDienThoai.Data;
 using QL_CuaHangDienThoai.Helpers;
 using QL_CuaHangDienThoai.Models;
-using QL_CuaHangDienThoai.Services; // ← Thêm Services
+using QL_CuaHangDienThoai.Services;
 using QL_CuaHangDienThoai.ViewModels;
 
 namespace QL_CuaHangDienThoai.Controllers
@@ -13,9 +13,9 @@ namespace QL_CuaHangDienThoai.Controllers
     public class CheckoutController : Controller
     {
         private readonly ApplicationDbContext _context;
-        private readonly VnPayService _vnPayService; // ← Thay đổi từ VnPayHelper
+        private readonly VnPayService _vnPayService; 
 
-        public CheckoutController(ApplicationDbContext context, VnPayService vnPayService) // ← Thay đổi
+        public CheckoutController(ApplicationDbContext context, VnPayService vnPayService)
         {
             _context = context;
             _vnPayService = vnPayService;
@@ -31,7 +31,6 @@ namespace QL_CuaHangDienThoai.Controllers
                 return RedirectToAction("Index", "Cart");
             }
 
-            // Lấy thông tin khách hàng để điền sẵn form
             var khachHang = await GetCurrentCustomer();
             var model = new CheckoutViewModel
             {
@@ -63,7 +62,6 @@ namespace QL_CuaHangDienThoai.Controllers
                 return View(model);
             }
 
-            // Kiểm tra tồn kho
             foreach (var item in model.Cart.Items)
             {
                 var product = await _context.DienThoais.FindAsync(item.MaDT);
@@ -93,7 +91,7 @@ namespace QL_CuaHangDienThoai.Controllers
                     maNhanVien = nhanVien?.MaQTV;
                 }
 
-                // Tạo hóa đơn
+
                 var orderId = await GenerateOrderId();
                 var hoaDon = new HoaDon
                 {
@@ -106,7 +104,6 @@ namespace QL_CuaHangDienThoai.Controllers
 
                 _context.HoaDons.Add(hoaDon);
 
-                // Tạo chi tiết hóa đơn và cập nhật tồn kho
                 foreach (var item in model.Cart.Items)
                 {
                     var product = await _context.DienThoais.FindAsync(item.MaDT);
@@ -121,7 +118,6 @@ namespace QL_CuaHangDienThoai.Controllers
                         };
                         _context.ChiTietHoaDons.Add(chiTiet);
 
-                        // Cập nhật tồn kho
                         product.SoLuongTon -= item.SoLuong;
                         _context.Update(product);
                     }
@@ -129,10 +125,8 @@ namespace QL_CuaHangDienThoai.Controllers
 
                 await _context.SaveChangesAsync();
 
-                // Xử lý thanh toán
                 if (model.PhuongThucThanhToan == "VNPay")
                 {
-                    // ← THAY ĐỔI TOÀN BỘ PHẦN VNPAY
                     var paymentId = Guid.NewGuid().ToString();
                     var payment = new ThanhToanTrucTuyen
                     {
@@ -148,7 +142,6 @@ namespace QL_CuaHangDienThoai.Controllers
                     await _context.SaveChangesAsync();
                     await transaction.CommitAsync();
 
-                    // Tạo VNPay request với service mới
                     var vnpayRequest = new VnPaymentRequestModel
                     {
                         OrderId = orderId,
@@ -163,7 +156,6 @@ namespace QL_CuaHangDienThoai.Controllers
                 }
                 else if (model.PhuongThucThanhToan == "QR")
                 {
-                    // Chuyển khoản QR - giữ nguyên
                     var paymentId = Guid.NewGuid().ToString();
                     var payment = new ThanhToanTrucTuyen
                     {
@@ -184,7 +176,6 @@ namespace QL_CuaHangDienThoai.Controllers
                 }
                 else
                 {
-                    // COD - giữ nguyên
                     await transaction.CommitAsync();
                     await ClearUserCart();
 
@@ -200,7 +191,6 @@ namespace QL_CuaHangDienThoai.Controllers
             }
         }
 
-        // ← THAY ĐỔI TOÀN BỘ CALLBACK VNPAY
         public async Task<IActionResult> PaymentCallback()
         {
             var response = _vnPayService.PaymentExecute(Request.Query);
@@ -209,7 +199,6 @@ namespace QL_CuaHangDienThoai.Controllers
 
             if (response.Success && response.VnPayResponseCode == "00")
             {
-                // Thanh toán thành công
                 var payment = await _context.ThanhToanTrucTuyens
                     .FirstOrDefaultAsync(p => p.MaHD == response.OrderId);
 
@@ -229,7 +218,6 @@ namespace QL_CuaHangDienThoai.Controllers
                 }
             }
 
-            // Thanh toán thất bại
             var failedPayment = await _context.ThanhToanTrucTuyens
                 .FirstOrDefaultAsync(p => p.MaHD == response.OrderId);
 
@@ -291,7 +279,6 @@ namespace QL_CuaHangDienThoai.Controllers
             return View(payment);
         }
 
-        // ← CÁC HELPER METHODS VÀ QR PAYMENT GIỮ NGUYÊN
         private async Task<CartViewModel?> GetUserCart()
         {
             var tenDangNhap = User.Identity.Name;
@@ -361,7 +348,6 @@ namespace QL_CuaHangDienThoai.Controllers
             return $"HD{DateTime.Now:yyyyMMddHHmmss}";
         }
 
-        // Trang hiển thị QR code
         [Authorize(Policy = "CustomerOnly")]
         public async Task<IActionResult> QRPayment(string id)
         {
@@ -374,7 +360,6 @@ namespace QL_CuaHangDienThoai.Controllers
             if (hoaDon == null)
                 return NotFound();
 
-            // Kiểm tra quyền truy cập
             var tenDangNhap = User.Identity.Name;
             if (hoaDon.KhachHang?.TenDangNhap != tenDangNhap)
                 return Forbid();
@@ -386,7 +371,6 @@ namespace QL_CuaHangDienThoai.Controllers
             return View(hoaDon);
         }
 
-        // Kiểm tra trạng thái thanh toán (AJAX)
         [Authorize(Policy = "CustomerOnly")]
         public async Task<IActionResult> CheckPaymentStatus(string orderId)
         {

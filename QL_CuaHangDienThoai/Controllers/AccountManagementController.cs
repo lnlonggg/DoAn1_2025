@@ -7,7 +7,7 @@ using QL_CuaHangDienThoai.ViewModels;
 
 namespace QL_CuaHangDienThoai.Controllers
 {
-    [Authorize(Policy = "AdminOnly")]  // Chỉ Admin mới có quyền truy cập
+    [Authorize(Policy = "AdminOnly")] 
     public class AccountManagementController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -17,7 +17,6 @@ namespace QL_CuaHangDienThoai.Controllers
             _context = context;
         }
 
-        // Danh sách tài khoản
         public async Task<IActionResult> Index()
         {
             var accounts = await _context.TaiKhoans
@@ -30,7 +29,6 @@ namespace QL_CuaHangDienThoai.Controllers
             return View(accounts);
         }
 
-        // Tạo tài khoản mới
         [HttpGet]
         public IActionResult Create()
         {
@@ -58,7 +56,7 @@ namespace QL_CuaHangDienThoai.Controllers
                 try
                 {
                     Console.WriteLine("Creating TaiKhoan with Email...");
-                    // Tạo tài khoản với Email
+                    
                     var taiKhoan = new TaiKhoan
                     {
                         TenDangNhap = model.TenDangNhap,
@@ -69,7 +67,7 @@ namespace QL_CuaHangDienThoai.Controllers
                     _context.TaiKhoans.Add(taiKhoan);
                     Console.WriteLine($"✅ TaiKhoan created with Email: {taiKhoan.Email}");
 
-                    // Tạo thông tin chi tiết theo vai trò
+                   
                     if (model.VaiTro == "khach")
                     {
                         var maKH = await GenerateCustomerId();
@@ -121,7 +119,7 @@ namespace QL_CuaHangDienThoai.Controllers
             return View(model);
         }
 
-        // Chỉnh sửa tài khoản
+       
         [HttpGet]
         public async Task<IActionResult> Edit(string id)
         {
@@ -171,16 +169,15 @@ namespace QL_CuaHangDienThoai.Controllers
                 using var transaction = await _context.Database.BeginTransactionAsync();
                 try
                 {
-                    // Cập nhật mật khẩu nếu có
+                   
                     if (!string.IsNullOrEmpty(model.MatKhauMoi))
                     {
                         taiKhoan.MatKhau = model.MatKhauMoi;
                     }
 
-                    // ← Cập nhật Email trong TaiKhoan
+                    
                     taiKhoan.Email = model.Email ?? string.Empty;
 
-                    // Cập nhật thông tin chi tiết
                     if (taiKhoan.VaiTro == "khach" && taiKhoan.KhachHang != null)
                     {
                         taiKhoan.KhachHang.HoTen = model.HoTen ?? string.Empty;
@@ -213,7 +210,6 @@ namespace QL_CuaHangDienThoai.Controllers
             return View(model);
         }
 
-        // Đổi vai trò tài khoản
         [HttpPost]
         public async Task<IActionResult> ChangeRole(string username, string newRole)
         {
@@ -247,7 +243,6 @@ namespace QL_CuaHangDienThoai.Controllers
             }
         }
 
-        // Khóa/Mở khóa tài khoản
         [HttpPost]
         public async Task<IActionResult> ToggleAccount(string username)
         {
@@ -265,7 +260,6 @@ namespace QL_CuaHangDienThoai.Controllers
             return Json(new { success = true, message = "Tính năng khóa tài khoản sẽ được phát triển tiếp." });
         }
 
-        // Xóa tài khoản
         [HttpPost]
         public async Task<IActionResult> Delete(string username)
         {
@@ -284,7 +278,7 @@ namespace QL_CuaHangDienThoai.Controllers
                 return Json(new { success = false, message = "Không tìm thấy tài khoản." });
             }
 
-            // Kiểm tra ràng buộc dữ liệu
+
             if (taiKhoan.VaiTro == "khach")
             {
                 var hasOrders = await _context.HoaDons.AnyAsync(h => h.MaKH == taiKhoan.KhachHang.MaKH);
@@ -306,14 +300,12 @@ namespace QL_CuaHangDienThoai.Controllers
             {
                 using var transaction = await _context.Database.BeginTransactionAsync();
 
-                // Xóa thông tin chi tiết trước
                 if (taiKhoan.KhachHang != null)
                     _context.KhachHangs.Remove(taiKhoan.KhachHang);
 
                 if (taiKhoan.QuanTriVien != null)
                     _context.QuanTriViens.Remove(taiKhoan.QuanTriVien);
 
-                // Xóa tài khoản
                 _context.TaiKhoans.Remove(taiKhoan);
 
                 await _context.SaveChangesAsync();
@@ -327,7 +319,6 @@ namespace QL_CuaHangDienThoai.Controllers
             }
         }
 
-        // Helper methods
         private async Task<string> GenerateCustomerId()
         {
             string newId;
@@ -351,7 +342,6 @@ namespace QL_CuaHangDienThoai.Controllers
 
                 Console.WriteLine($"Generated potential MaKH: {newId}");
 
-                // Kiểm tra trùng lặp
                 exists = await _context.KhachHangs.AnyAsync(k => k.MaKH == newId);
 
                 if (exists)
@@ -375,7 +365,6 @@ namespace QL_CuaHangDienThoai.Controllers
 
             do
             {
-                // Tìm MaQTV lớn nhất hiện tại
                 var lastStaff = await _context.QuanTriViens
                     .OrderByDescending(q => q.MaQTV)
                     .FirstOrDefaultAsync();
@@ -386,20 +375,20 @@ namespace QL_CuaHangDienThoai.Controllers
                 }
                 else
                 {
-                    // Extract số từ MaQTV (ví dụ: QTV002 -> 2)
+    
                     var lastNumber = int.Parse(lastStaff.MaQTV.Substring(3));
                     newId = $"QTV{(lastNumber + 1):D3}";
                 }
 
                 Console.WriteLine($"Generated potential MaQTV: {newId}");
 
-                // Kiểm tra xem ID này đã tồn tại chưa
+
                 exists = await _context.QuanTriViens.AnyAsync(q => q.MaQTV == newId);
 
                 if (exists)
                 {
                     Console.WriteLine($"MaQTV {newId} already exists, generating new one...");
-                    // Nếu vẫn trùng, thêm timestamp
+
                     var timestamp = DateTime.Now.ToString("mmss");
                     newId = $"QTV{timestamp}";
                     exists = await _context.QuanTriViens.AnyAsync(q => q.MaQTV == newId);

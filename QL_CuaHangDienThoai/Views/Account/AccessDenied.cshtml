@@ -1,0 +1,160 @@
+﻿@{
+    ViewData["Title"] = "Truy cập bị từ chối";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card border-warning">
+            <div class="card-header bg-warning text-dark text-center">
+                <h4>🚫 Truy cập bị từ chối</h4>
+            </div>
+            <div class="card-body text-center">
+                <div class="mb-4">
+                    <i class="fas fa-ban fa-5x text-warning mb-3"></i>
+                    <h5>Bạn không có quyền truy cập trang này</h5>
+
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        var currentRole = "";
+                        if (User.HasClaim("VaiTro", "admin"))
+                            currentRole = "👑 Admin";
+                        else if (User.HasClaim("VaiTro", "nhanvien"))
+                            currentRole = "👨‍💼 Nhân viên";
+                        else if (User.HasClaim("VaiTro", "khach"))
+                            currentRole = "👤 Khách hàng";
+
+                        <div class="alert alert-info">
+                            <p class="mb-2">
+                                <strong>Tài khoản hiện tại:</strong> @User.Identity.Name
+                            </p>
+                            <p class="mb-0">
+                                <strong>Vai trò:</strong> @currentRole
+                            </p>
+                        </div>
+
+                        <p class="text-muted">
+                            Trang này yêu cầu quyền truy cập cao hơn quyền hiện tại của bạn.
+                        </p>
+                    }
+                    else
+                    {
+                        <div class="alert alert-warning">
+                            <p class="mb-0">
+                                Bạn chưa đăng nhập. Vui lòng đăng nhập để tiếp tục.
+                            </p>
+                        </div>
+                    }
+                </div>
+
+                <div class="row mb-4">
+                    <div class="col-md-4">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h6>👑 Admin</h6>
+                                <small class="text-muted">
+                                    • Quản lý tài khoản<br>
+                                    • Xem báo cáo chi tiết<br>
+                                    • Toàn quyền hệ thống
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h6>👨‍💼 Nhân viên</h6>
+                                <small class="text-muted">
+                                    • Quản lý sản phẩm<br>
+                                    • Xử lý đơn hàng<br>
+                                    • Xác nhận thanh toán
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h6>👤 Khách hàng</h6>
+                                <small class="text-muted">
+                                    • Mua sắm trực tuyến<br>
+                                    • Quản lý đơn hàng<br>
+                                    • Theo dõi giao hàng
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex justify-content-center gap-3">
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        @if (User.HasClaim("VaiTro", "admin"))
+                        {
+                            <a asp-controller="Admin" asp-action="Index" class="btn btn-primary">
+                                📊 Về Dashboard Admin
+                            </a>
+                        }
+                        else if (User.HasClaim("VaiTro", "nhanvien"))
+                        {
+                            <a asp-controller="Admin" asp-action="Index" class="btn btn-primary">
+                                📊 Về Dashboard Nhân viên
+                            </a>
+                        }
+                        else
+                        {
+                            <a asp-controller="Shop" asp-action="Index" class="btn btn-primary">
+                                🛍️ Về cửa hàng
+                            </a>
+                        }
+
+                        @* <a asp-controller="Account" asp-action="Logout" class="btn btn-outline-secondary">
+                            🚪 Đăng xuất
+                        </a> *@
+                    }
+                    else
+                    {
+                        <a asp-controller="Account" asp-action="Login" class="btn btn-primary">
+                            🔑 Đăng nhập
+                        </a>
+                        <a asp-controller="Account" asp-action="Register" class="btn btn-outline-primary">
+                            📝 Đăng ký
+                        </a>
+                    }
+
+                    <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">
+                        🏠 Về trang chủ
+                    </a>
+                </div>
+
+                
+                <div class="mt-4 pt-3 border-top">
+                    <h6>📞 Cần hỗ trợ?</h6>
+                    <p class="text-muted mb-1">
+                        📧 Email: <strong>supportnhom5UNETI@store.com</strong>
+                    </p>
+                    <p class="text-muted mb-0">
+                        📱 Hotline: <strong>1900-1234</strong>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (Context.Request.Headers.ContainsKey("Referer"))
+{
+    <div class="row justify-content-center mt-3">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-body">
+                    <h6>🔍 Thông tin debug (chỉ hiển thị trong Development)</h6>
+                    <small class="text-muted">
+                        <strong>Trang truy cập:</strong> @Context.Request.Headers["Referer"]<br>
+                        <strong>Thời gian:</strong> @DateTime.Now.ToString("dd/MM/yyyy HH:mm:ss")<br>
+                        <strong>User Agent:</strong> @Context.Request.Headers["User-Agent"]
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+}

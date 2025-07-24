@@ -25,21 +25,14 @@ namespace QL_CuaHangDienThoai.Controllers
 
                 switch (vaiTro)
                 {
-                    //case "admin":
-                    //    return RedirectToAction("Index", "Admin");
-                    //case "nhanvien":
-                    //    return RedirectToAction("Index", "DienThoai");
-                    //default:
-                    //    break;
                     case "admin":
-                    case "nhanvien":  // ← Thêm nhân viên cũng vào Admin dashboard
+                    case "nhanvien":
                         return RedirectToAction("Index", "Admin");
                     default:
                         break;
                 }
             }
 
-            // Hiển thị trang chủ cho khách hàng hoặc người dùng chưa đăng nhập
             var featuredProducts = await _context.DienThoais
                 .Where(d => d.SoLuongTon > 0)
                 .OrderByDescending(d => d.MaDT)

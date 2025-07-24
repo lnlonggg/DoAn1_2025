@@ -26,7 +26,6 @@ namespace QL_CuaHangDienThoai.Models
         [StringLength(20)]
         public string VaiTro { get; set; } = string.Empty;
 
-        // Navigation properties
         public virtual KhachHang? KhachHang { get; set; }
         public virtual QuanTriVien? QuanTriVien { get; set; }
     }
@@ -55,7 +54,6 @@ namespace QL_CuaHangDienThoai.Models
         [StringLength(50)]
         public string? TenDangNhap { get; set; }
 
-        // Navigation properties
         [ForeignKey("TenDangNhap")]
         public virtual TaiKhoan? TaiKhoan { get; set; }
         public virtual ICollection<HoaDon> HoaDons { get; set; } = new List<HoaDon>();
@@ -85,7 +83,6 @@ namespace QL_CuaHangDienThoai.Models
         [StringLength(50)]
         public string? TenDangNhap { get; set; }
 
-        // Navigation properties
         [ForeignKey("TenDangNhap")]
         public virtual TaiKhoan? TaiKhoan { get; set; }
         public virtual ICollection<HoaDon> HoaDons { get; set; } = new List<HoaDon>();
@@ -103,7 +100,7 @@ namespace QL_CuaHangDienThoai.Models
         [StringLength(100)]
         public string? TenDT { get; set; }
 
-        [Column("DonGia")]  // ← Đổi từ DonGia thành DonGia
+        [Column("DonGia")] 
         [Range(0, double.MaxValue)]
         public decimal DonGia { get; set; }
 
@@ -111,7 +108,6 @@ namespace QL_CuaHangDienThoai.Models
         [Range(0, int.MaxValue)]
         public int SoLuongTon { get; set; }
 
-        // Navigation properties
         public virtual ICollection<ChiTietHoaDon> ChiTietHoaDons { get; set; } = new List<ChiTietHoaDon>();
     }
 
@@ -137,7 +133,6 @@ namespace QL_CuaHangDienThoai.Models
         [Column("TongTien")]
         public decimal TongTien { get; set; }
 
-        // Navigation properties
         [ForeignKey("MaKH")]
         public virtual KhachHang? KhachHang { get; set; }
 
@@ -168,7 +163,6 @@ namespace QL_CuaHangDienThoai.Models
         [NotMapped]
         public decimal ThanhTien => SoLuong * DonGia;
 
-        // Navigation properties
         [ForeignKey("MaHD")]
         public virtual HoaDon? HoaDon { get; set; }
 
@@ -191,7 +185,6 @@ namespace QL_CuaHangDienThoai.Models
         [Column("NgayTao")]
         public DateTime NgayTao { get; set; }
 
-        // Navigation properties
         [ForeignKey("MaKH")]
         public virtual KhachHang? KhachHang { get; set; }
         public virtual ICollection<ChiTietGioHang> ChiTietGioHangs { get; set; } = new List<ChiTietGioHang>();
@@ -216,18 +209,15 @@ namespace QL_CuaHangDienThoai.Models
         [Column("NgayThem")]
         public DateTime NgayThem { get; set; }
 
-        // Navigation properties
         [ForeignKey("MaGH")]
         public virtual GioHang? GioHang { get; set; }
 
         [ForeignKey("MaDT")]
         public virtual DienThoai? DienThoai { get; set; }
 
-        // Computed property
         public decimal ThanhTien => SoLuong * (DienThoai?.DonGia ?? 0);
     }
 
-    // Enum cho trạng thái thanh toán
     public enum TrangThaiThanhToan
     {
         ChoDuyet,
@@ -236,7 +226,6 @@ namespace QL_CuaHangDienThoai.Models
         DaHuy
     }
 
-    // Model cho thanh toán online
     [Table("THANHTOANTRUCTUYEN")]
     public class ThanhToanTrucTuyen
     {
@@ -254,7 +243,7 @@ namespace QL_CuaHangDienThoai.Models
 
         [Column("PhuongThucThanhToan")]
         [StringLength(50)]
-        public string PhuongThucThanhToan { get; set; } = string.Empty; // VNPay, Momo, etc.
+        public string PhuongThucThanhToan { get; set; } = string.Empty;
 
         [Column("TrangThai")]
         public TrangThaiThanhToan TrangThai { get; set; }
@@ -272,7 +261,6 @@ namespace QL_CuaHangDienThoai.Models
         [Column("ThongTinThem")]
         public string? ThongTinThem { get; set; }
 
-        // Navigation properties
         [ForeignKey("MaHD")]
         public virtual HoaDon? HoaDon { get; set; }
     }

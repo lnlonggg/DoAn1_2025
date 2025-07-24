@@ -55,7 +55,6 @@ namespace QL_CuaHangDienThoai.Controllers
 
                     await HttpContext.SignInAsync("Cookies", new ClaimsPrincipal(claimsIdentity), authProperties);
 
-                    // Redirect theo vai trò
                     if (taiKhoan.VaiTro == "admin")
                     {
                         return RedirectToAction("Index", "Admin");
@@ -94,7 +93,6 @@ namespace QL_CuaHangDienThoai.Controllers
         {
             if (ModelState.IsValid)
             {
-                // Kiểm tra tên đăng nhập đã tồn tại
                 var existingAccount = await _context.TaiKhoans
                     .AnyAsync(t => t.TenDangNhap == model.TenDangNhap || t.Email == model.Email);
 
@@ -103,8 +101,7 @@ namespace QL_CuaHangDienThoai.Controllers
                     ModelState.AddModelError("", "Tên đăng nhập hoặc email đã tồn tại.");
                     return View(model);
                 }
-
-                // Tạo tài khoản mới
+     
                 var taiKhoan = new TaiKhoan
                 {
                     TenDangNhap = model.TenDangNhap,
@@ -114,8 +111,6 @@ namespace QL_CuaHangDienThoai.Controllers
                 };
 
                 _context.TaiKhoans.Add(taiKhoan);
-
-                // Tạo thông tin khách hàng
                 var khachHang = new KhachHang
                 {
                     MaKH = GenerateKhachHangId(),
@@ -146,6 +141,16 @@ namespace QL_CuaHangDienThoai.Controllers
 
         public IActionResult AccessDenied()
         {
+            var referer = Request.Headers["Referer"].ToString();
+            var userRole = User.HasClaim("VaiTro", "admin") ? "Admin" :
+                           User.HasClaim("VaiTro", "nhanvien") ? "Nhân viên" :
+                           User.HasClaim("VaiTro", "khach") ? "Khách hàng" : "Guest";
+
+            Console.WriteLine($"Access Denied: User '{User.Identity.Name}' (Role: {userRole}) tried to access: {referer}");
+
+            ViewBag.UserRole = userRole;
+            ViewBag.RefererUrl = referer;
+
             return View();
         }
 

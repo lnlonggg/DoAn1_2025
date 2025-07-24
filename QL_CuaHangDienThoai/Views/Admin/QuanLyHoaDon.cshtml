@@ -54,7 +54,6 @@
     </div>
 </div>
 
-<!-- Orders Table -->
 <div class="card">
     <div class="card-body">
         <div class="table-responsive">
@@ -90,7 +89,7 @@
                                 {
                                     @foreach (var item in order.ChiTietHoaDons.Take(2))
                                     {
-                                        <small>• @item.DienThoai?.TenDT (x@item.SoLuong)</small>
+                                        <small>• @item.DienThoai?.TenDT (@item.SoLuong)</small>
                             
                                         <br>
                                     }

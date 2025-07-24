@@ -51,7 +51,7 @@
                         {
                             @foreach (var item in payment.HoaDon.ChiTietHoaDons.Take(3))
                             {
-                                <small class="d-block">• @item.DienThoai?.TenDT (x@item.SoLuong)</small>
+                                <small class="d-block">• @item.DienThoai?.TenDT (@item.SoLuong)</small>
                             }
                             @if (payment.HoaDon.ChiTietHoaDons.Count > 3)
                             {

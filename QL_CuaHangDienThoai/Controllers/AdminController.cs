@@ -18,13 +18,13 @@ namespace QL_CuaHangDienThoai.Controllers
 
         public async Task<IActionResult> Index()
         {
-            // Thống kê cơ bản
+            
             ViewBag.TongSanPham = await _context.DienThoais.CountAsync();
             ViewBag.TongKhachHang = await _context.KhachHangs.CountAsync();
             ViewBag.TongHoaDon = await _context.HoaDons.CountAsync();
             ViewBag.TongDoanhThu = await _context.HoaDons.SumAsync(h => h.TongTien);
 
-            // Sản phẩm bán chạy
+            
             var sanPhamBanChay = await (from ct in _context.ChiTietHoaDons
                                         join dt in _context.DienThoais on ct.MaDT equals dt.MaDT
                                         group ct by new { ct.MaDT, dt.TenDT } into g
@@ -38,7 +38,7 @@ namespace QL_CuaHangDienThoai.Controllers
                                         }).Take(5).ToListAsync();
 
             ViewBag.SanPhamBanChay = sanPhamBanChay;
-            // Thêm đếm pending payments
+            
             ViewBag.PendingPayments = await _context.ThanhToanTrucTuyens
             .CountAsync(p => p.TrangThai == TrangThaiThanhToan.ChoDuyet);
 
@@ -74,13 +74,10 @@ namespace QL_CuaHangDienThoai.Controllers
         [Authorize(Policy = "AdminOnly")]
         public async Task<IActionResult> BaoCaoChiTiet()
         {
-            var fromDate = DateTime.Today.AddDays(-30); // 30 ngày trước
+            var fromDate = DateTime.Today.AddDays(-30);
             var toDate = DateTime.Today;
-
-            // Báo cáo tổng quan
             var report = new
             {
-                // Doanh thu theo ngày (7 ngày gần nhất)
                 DoanhThuTheoNgay = await _context.HoaDons
                     .Where(h => h.NgayLap >= DateTime.Today.AddDays(-6))
                     .GroupBy(h => h.NgayLap.Date)
@@ -92,8 +89,6 @@ namespace QL_CuaHangDienThoai.Controllers
                     })
                     .OrderBy(x => x.NgayDate)
                     .ToListAsync(),
-
-                // Top sản phẩm bán chạy
                 TopSanPham = await (from ct in _context.ChiTietHoaDons
                                     join dt in _context.DienThoais on ct.MaDT equals dt.MaDT
                                     join hd in _context.HoaDons on ct.MaHD equals hd.MaHD
@@ -109,7 +104,6 @@ namespace QL_CuaHangDienThoai.Controllers
                                         DoanhThu = g.Sum(x => x.SoLuong * x.DonGia)
                                     }).Take(10).ToListAsync(),
 
-                // Top khách hàng
                 TopKhachHang = await (from hd in _context.HoaDons
                                       join kh in _context.KhachHangs on hd.MaKH equals kh.MaKH
                                       where hd.NgayLap >= fromDate
@@ -124,7 +118,6 @@ namespace QL_CuaHangDienThoai.Controllers
                                           TongTien = g.Sum(h => h.TongTien)
                                       }).Take(10).ToListAsync(),
 
-                // Thống kê tồn kho
                 ThongKeTonKho = await _context.DienThoais
                     .Select(dt => new
                     {
@@ -137,7 +130,6 @@ namespace QL_CuaHangDienThoai.Controllers
                     .OrderBy(dt => dt.SoLuongTon)
                     .ToListAsync(),
 
-                // Thống kê tổng quan
                 TongQuan = new
                 {
                     TongDoanhThu30Ngay = await _context.HoaDons
@@ -166,8 +158,6 @@ namespace QL_CuaHangDienThoai.Controllers
             return View();
         }
 
-        // Xem danh sách thanh toán chờ xác nhận
-
         [Authorize(Policy = "StaffOnly")]
         public async Task<IActionResult> XacNhanThanhToan()
         {
@@ -183,7 +173,6 @@ namespace QL_CuaHangDienThoai.Controllers
             return View(pendingPayments);
         }
 
-        // Xác nhận thanh toán thành công
         [HttpPost]
         public async Task<IActionResult> ApprovePayment(string paymentId)
         {
@@ -193,17 +182,14 @@ namespace QL_CuaHangDienThoai.Controllers
 
             if (payment != null)
             {
-                // Lấy thông tin nhân viên đang xác nhận
                 var tenDangNhap = User.Identity.Name;
                 var nhanVien = await _context.QuanTriViens
                     .FirstOrDefaultAsync(q => q.TenDangNhap == tenDangNhap);
 
-                // Cập nhật payment
                 payment.TrangThai = TrangThaiThanhToan.DaThanhToan;
                 payment.NgayCapNhat = DateTime.Now;
                 payment.ThongTinThem += $" - Được xác nhận bởi {User.Identity.Name} lúc {DateTime.Now:dd/MM/yyyy HH:mm}";
 
-                // Cập nhật hóa đơn với thông tin nhân viên xác nhận
                 if (payment.HoaDon != null && nhanVien != null)
                 {
                     payment.HoaDon.MaQTV = nhanVien.MaQTV;
@@ -219,7 +205,6 @@ namespace QL_CuaHangDienThoai.Controllers
             return RedirectToAction("XacNhanThanhToan");
         }
 
-        // Từ chối thanh toán
         [HttpPost]
         public async Task<IActionResult> RejectPayment(string paymentId, string reason)
         {

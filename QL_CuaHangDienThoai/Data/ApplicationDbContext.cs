@@ -15,9 +15,6 @@ namespace QL_CuaHangDienThoai.Data
         public DbSet<DienThoai> DienThoais { get; set; }
         public DbSet<HoaDon> HoaDons { get; set; }
         public DbSet<ChiTietHoaDon> ChiTietHoaDons { get; set; }
-
-
-        //Thêm thanh toán và giỏ hàng
         public DbSet<GioHang> GioHangs { get; set; }
         public DbSet<ChiTietGioHang> ChiTietGioHangs { get; set; }
         public DbSet<ThanhToanTrucTuyen> ThanhToanTrucTuyens { get; set; }
@@ -25,11 +22,11 @@ namespace QL_CuaHangDienThoai.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            // Cấu hình khóa chính composite cho ChiTietHoaDon
+            
             modelBuilder.Entity<ChiTietHoaDon>()
                 .HasKey(c => new { c.MaHD, c.MaDT });
 
-            // Cấu hình decimal precision
+           
             modelBuilder.Entity<DienThoai>()
                 .Property(d => d.DonGia)
                 .HasPrecision(12, 2);
@@ -42,11 +39,9 @@ namespace QL_CuaHangDienThoai.Data
                 .Property(c => c.DonGia)
                 .HasPrecision(12, 2);
 
-            // Cấu hình check constraints
             modelBuilder.Entity<TaiKhoan>()
                 .HasCheckConstraint("CK_TaiKhoan_VaiTro", "[VaiTro] IN ('khach', 'admin', 'nhanvien')");
 
-            // Cấu hình relationships
             modelBuilder.Entity<KhachHang>()
                 .HasOne(k => k.TaiKhoan)
                 .WithOne(t => t.KhachHang)
@@ -79,22 +74,15 @@ namespace QL_CuaHangDienThoai.Data
 
             base.OnModelCreating(modelBuilder);
 
-            // Cấu hình composite key cho ChiTietGioHang
             modelBuilder.Entity<ChiTietGioHang>()
                 .HasKey(ct => new { ct.MaGH, ct.MaDT });
 
-            // Cấu hình composite key cho ChiTietHoaDon (nếu chưa có)
             modelBuilder.Entity<ChiTietHoaDon>()
                 .HasKey(ct => new { ct.MaHD, ct.MaDT });
 
-            // Cấu hình enum
             modelBuilder.Entity<ThanhToanTrucTuyen>()
                 .Property(e => e.TrangThai)
                 .HasConversion<string>();
         }
-
-        
-
-        
     }
 }

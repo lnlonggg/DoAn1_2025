@@ -52,8 +52,6 @@ namespace QL_CuaHangDienThoai.ViewModels
         [Required(ErrorMessage = "Vui lòng chọn phương thức thanh toán")]
         [Display(Name = "Phương thức thanh toán")]
         public string PhuongThucThanhToan { get; set; } = string.Empty;
-
-        // Thông tin giỏ hàng
         public CartViewModel Cart { get; set; } = new CartViewModel();
     }
 }

@@ -216,7 +216,6 @@ namespace QL_CuaHangDienThoai.Controllers
             var dienThoai = await _context.DienThoais.FindAsync(id);
             if (dienThoai != null)
             {
-                // Kiểm tra xem có hóa đơn nào đang sử dụng sản phẩm này không
                 var hasOrders = await _context.ChiTietHoaDons.AnyAsync(ct => ct.MaDT == id);
                 if (hasOrders)
                 {

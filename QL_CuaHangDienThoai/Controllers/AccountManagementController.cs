@@ -388,7 +388,6 @@ namespace QL_CuaHangDienThoai.Controllers
                 if (exists)
                 {
                     Console.WriteLine($"MaQTV {newId} already exists, generating new one...");
-
                     var timestamp = DateTime.Now.ToString("mmss");
                     newId = $"QTV{timestamp}";
                     exists = await _context.QuanTriViens.AnyAsync(q => q.MaQTV == newId);

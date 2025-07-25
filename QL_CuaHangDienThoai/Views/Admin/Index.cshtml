@@ -2,12 +2,6 @@
     ViewData["Title"] = "Dashboard Admin";
 }
 
-@* <div class="row mb-4">
-    <div class="col-12">
-        <h2>📊 Dashboard Quản Trị</h2>
-        <p class="text-muted">Tổng quan hoạt động kinh doanh của cửa hàng</p>
-    </div>
-</div> *@
 <div class="row mb-4">
     <div class="col-12">
         @if (User.HasClaim("VaiTro", "admin"))
@@ -23,7 +17,7 @@
     </div>
 </div>
 
-<!-- Statistics Cards -->
+    
 <div class="row mb-4">
     <div class="col-md-3 mb-3">
         <div class="card text-white" style="background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);">

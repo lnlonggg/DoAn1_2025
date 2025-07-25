@@ -76,9 +76,9 @@
                         <a asp-controller="DonHang" asp-action="Create" asp-route-productId="@Model.MaDT" class="btn btn-success btn-lg">
                             🛒 Đặt hàng ngay
                         </a>
-                        <button class="btn btn-outline-primary btn-lg" onclick="addToCart('@Model.MaDT')">
+                        @* <button class="btn btn-outline-primary btn-lg" onclick="addToCart('@Model.MaDT')">
                             ❤️ Yêu thích
-                        </button>
+                        </button> *@
                     }
                     else
                     {
@@ -96,7 +96,6 @@
     </div>
 </div>
 
-<!-- Product Info -->
 <div class="row mt-4">
     <div class="col-12">
         <div class="card">

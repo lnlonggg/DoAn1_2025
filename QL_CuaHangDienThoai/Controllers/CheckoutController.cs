@@ -44,7 +44,6 @@ namespace QL_CuaHangDienThoai.Controllers
             return View(model);
         }
 
-        // POST: Checkout
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Index(CheckoutViewModel model)

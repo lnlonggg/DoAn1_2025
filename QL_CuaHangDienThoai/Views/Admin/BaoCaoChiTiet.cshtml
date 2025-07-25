@@ -1,199 +1,438 @@
 ﻿@{
     ViewData["Title"] = "Báo cáo chi tiết";
     var report = ViewBag.Report;
+    var fromDate = ViewBag.FromDate;
+    var toDate = ViewBag.ToDate;
+    var reportType = ViewBag.ReportType ?? "overview";
+    var category = ViewBag.Category ?? "all";
+    var currentPage = ViewBag.CurrentPage ?? 1;
+    var categories = ViewBag.Categories as List<string>;
 }
 
-<div class="row mb-4">
-    <div class="col-12">
-        <h2>📊 Báo cáo chi tiết</h2>
-        <p class="text-muted">Phân tích kinh doanh 30 ngày gần nhất</p>
+<div class="container-fluid">
+    <!-- Header và bộ lọc -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h2>📊 Báo cáo chi tiết</h2>
+            <p class="text-muted">Phân tích kinh doanh với các bộ lọc nâng cao</p>
+        </div>
     </div>
-</div>
 
-<!-- Tổng quan -->
-<div class="row mb-4">
-    <div class="col-md-3">
-        <div class="card text-white bg-success">
-            <div class="card-body text-center">
-                <h4>@(((decimal)report.TongQuan.TongDoanhThu30Ngay).ToString("C0"))</h4>
-                <small>Doanh thu 30 ngày</small>
-            </div>
+    <!-- Bộ lọc nâng cao -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5><i class="fas fa-filter"></i> Bộ lọc báo cáo</h5>
         </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card text-white bg-primary">
-            <div class="card-body text-center">
-                <h4>@report.TongQuan.TongDonHang30Ngay</h4>
-                <small>Đơn hàng 30 ngày</small>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card text-white bg-info">
-            <div class="card-body text-center">
-                <h4>@(((decimal)report.TongQuan.DoanhThuTrungBinh).ToString("C0"))</h4>
-                <small>Đơn hàng trung bình</small>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card text-white bg-warning">
-            <div class="card-body text-center">
-                <h4>@(((decimal)report.TongQuan.TongGiaTriTonKho).ToString("C0"))</h4>
-                <small>Giá trị tồn kho</small>
-            </div>
-        </div>
-    </div>
-</div>
+        <div class="card-body">
+            <form id="filterForm" method="get">
+                <div class="row">
+                    <!-- Khoảng thời gian -->
+                    <div class="col-md-3">
+                        <label class="form-label">Từ ngày:</label>
+                        <input type="date" class="form-control" name="fromDate" 
+                               value="@(((DateTime)fromDate).ToString("yyyy-MM-dd"))" id="fromDate">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Đến ngày:</label>
+                        <input type="date" class="form-control" name="toDate" 
+                               value="@(((DateTime)toDate).ToString("yyyy-MM-dd"))" id="toDate">
+                    </div>
 
-<!-- Charts Row -->
-<div class="row mb-4">
-    <!-- Doanh thu theo ngày -->
-    <div class="col-lg-6">
-        <div class="card">
-            <div class="card-header">
-                <h6>📈 Doanh thu 7 ngày gần nhất</h6>
-            </div>
-            <div class="card-body">
-                <canvas id="revenueChart" height="300"></canvas>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Top sản phẩm -->
-    <div class="col-lg-6">
-        <div class="card">
-            <div class="card-header">
-                <h6>🔥 Top 5 sản phẩm bán chạy</h6>
-            </div>
-            <div class="card-body">
-                <canvas id="productChart" height="300"></canvas>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Tables Row -->
-<div class="row">
-    <!-- Top sản phẩm table -->
-    <div class="col-lg-4 mb-4">
-        <div class="card">
-            <div class="card-header">
-                <h6>📱 Top sản phẩm bán chạy</h6>
-            </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-sm">
-                        <thead>
-                            <tr>
-                                <th>Sản phẩm</th>
-                                <th class="text-center">Bán</th>
-                                <th class="text-end">Doanh thu</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var item in (IEnumerable<dynamic>)report.TopSanPham)
-                            {
-                                <tr>
-                                    <td>
-                                        <strong>@item.TenDT</strong><br>
-                                        <small class="text-muted">@item.MaDT</small>
-                                    </td>
-                                    <td class="text-center">
-                                        <span class="badge bg-primary">@item.SoLuongBan</span>
-                                    </td>
-                                    <td class="text-end">
-                                        <strong class="text-success">@(((decimal)item.DoanhThu).ToString("C0"))</strong>
-                                    </td>
-                                </tr>
+                    <!-- Loại báo cáo -->
+                    <div class="col-md-3">
+                        <label class="form-label">Loại báo cáo:</label>
+                        <select class="form-select" name="reportType" id="reportType">
+                            @{
+                                var reportOptions = new Dictionary<string, string>
+                                {
+                                    {"overview", "Tổng quan"},
+                                    {"daily", "Theo ngày"},
+                                    {"monthly", "Theo tháng"},
+                                    {"profit", "Lợi nhuận"},
+                                    {"products", "Sản phẩm"}
+                                };
                             }
-                        </tbody>
-                    </table>
+                            @foreach (var option in reportOptions)
+                            {
+                                if (reportType == option.Key)
+                                {
+                                    <option value="@option.Key" selected>@option.Value</option>
+                                }
+                                else
+                                {
+                                    <option value="@option.Key">@option.Value</option>
+                                }
+                            }
+                        </select>
+                    </div>
+
+                    <!-- Danh mục sản phẩm -->
+                    <div class="col-md-3">
+                        <label class="form-label">Danh mục:</label>
+                        <select class="form-select" name="category" id="category">
+                            @if (categories != null)
+                            {
+                                @foreach (var cat in categories)
+                                {
+                                    if (category == cat)
+                                    {
+                                        <option value="@cat" selected>@(cat == "all" ? "Tất cả" : cat.ToUpper())</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="@cat">@(cat == "all" ? "Tất cả" : cat.ToUpper())</option>
+                                    }
+                                }
+                            }
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="row mt-3">
+                    <div class="col-md-12">
+                        <button type="submit" class="btn btn-primary me-2">
+                            <i class="fas fa-search"></i> Xem báo cáo
+                        </button>
+                        <button type="button" class="btn btn-secondary me-2" onclick="resetFilters()">
+                            <i class="fas fa-undo"></i> Đặt lại
+                        </button>
+                        <button type="button" class="btn btn-success" onclick="exportReport()">
+                            <i class="fas fa-download"></i> Xuất Excel
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Thông báo khi không có dữ liệu -->
+    @if (report?.TongQuan?.TongDonHang30Ngay == 0)
+    {
+        <div class="alert alert-warning" role="alert">
+            <i class="fas fa-exclamation-triangle"></i>
+            <strong>Không có dữ liệu!</strong> Không có đơn hàng nào trong khoảng thời gian đã chọn.
+        </div>
+    }
+    else
+    {
+        <!-- Tổng quan KPI -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-white bg-success">
+                    <div class="card-body text-center">
+                        <h4>@(((decimal)report.TongQuan.TongDoanhThu30Ngay).ToString("C0"))</h4>
+                        <small>Doanh thu (@(((DateTime)fromDate).ToString("dd/MM")) - @(((DateTime)toDate).ToString("dd/MM")))</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-white bg-primary">
+                    <div class="card-body text-center">
+                        <h4>@report.TongQuan.TongDonHang30Ngay</h4>
+                        <small>Đơn hàng</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-white bg-info">
+                    <div class="card-body text-center">
+                        <h4>@(((decimal)report.TongQuan.DoanhThuTrungBinh).ToString("C0"))</h4>
+                        <small>Đơn hàng trung bình</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-white bg-warning">
+                    <div class="card-body text-center">
+                        <h4>@(((decimal)report.TongQuan.TongGiaTriTonKho).ToString("C0"))</h4>
+                        <small>Giá trị tồn kho</small>
+                        @if (report.TongQuan.SanPhamSapHet > 0)
+                        {
+                            <br><span class="badge bg-danger">@report.TongQuan.SanPhamSapHet sắp hết</span>
+                        }
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Top khách hàng -->
-    <div class="col-lg-4 mb-4">
-        <div class="card">
-            <div class="card-header">
-                <h6>👥 Top khách hàng VIP</h6>
+        <!-- Biểu đồ -->
+        <div class="row mb-4">
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h6>📈 Doanh thu theo thời gian</h6>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="revenueChart" height="300"></canvas>
+                    </div>
+                </div>
             </div>
-            <div class="card-body">
-                <div class="table-responsive">
-                    <table class="table table-sm">
-                        <thead>
-                            <tr>
-                                <th>Khách hàng</th>
-                                <th class="text-center">Đơn</th>
-                                <th class="text-end">Tổng tiền</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var item in (IEnumerable<dynamic>)report.TopKhachHang)
-                            {
-                                <tr>
-                                    <td>
-                                        <strong>@item.HoTen</strong><br>
-                                        <small class="text-muted">@item.SoDT</small>
-                                    </td>
-                                    <td class="text-center">
-                                        <span class="badge bg-info">@item.SoDonHang</span>
-                                    </td>
-                                    <td class="text-end">
-                                        <strong class="text-success">@(((decimal)item.TongTien).ToString("C0"))</strong>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
+            
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h6>🔥 Top 5 sản phẩm bán chạy</h6>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="productChart" height="300"></canvas>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 
-    <!-- Tồn kho -->
-    <div class="col-lg-4 mb-4">
-        <div class="card">
-            <div class="card-header d-flex justify-content-between">
-                <h6>📦 Tình trạng tồn kho</h6>
-                @if (report.TongQuan.SanPhamSapHet > 0)
-                {
-                    <span class="badge bg-danger">@report.TongQuan.SanPhamSapHet sắp hết</span>
-                }
-            </div>
-            <div class="card-body">
-                <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
-                    <table class="table table-sm">
-                        <thead>
-                            <tr>
-                                <th>Sản phẩm</th>
-                                <th class="text-center">Tồn</th>
-                                <th class="text-end">Giá trị</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var item in (IEnumerable<dynamic>)report.ThongKeTonKho)
-                            {
-                                <tr class="@(item.SoLuongTon <= 5 ? "table-danger" : item.SoLuongTon <= 10 ? "table-warning" : "")">
-                                    <td>
-                                        <strong>@item.TenDT</strong><br>
-                                        <small class="text-muted">@item.MaDT</small>
-                                    </td>
-                                    <td class="text-center">
-                                        <span class="badge @(item.SoLuongTon <= 5 ? "bg-danger" : item.SoLuongTon <= 10 ? "bg-warning" : "bg-success")">
-                                            @item.SoLuongTon
-                                        </span>
-                                    </td>
-                                    <td class="text-end">
-                                        <strong>@(((decimal)item.GiaTriTon).ToString("C0"))</strong>
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
+        <!-- Báo cáo lợi nhuận (nếu được chọn) -->
+        @if (reportType == "profit" && report.LoiNhuan != null)
+        {
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6>💰 Báo cáo lợi nhuận sản phẩm</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Sản phẩm</th>
+                                            <th class="text-end">Giá nhập</th>
+                                            <th class="text-end">Giá bán</th>
+                                            <th class="text-center">SL bán</th>
+                                            <th class="text-end">Doanh thu</th>
+                                            <th class="text-end">Lợi nhuận</th>
+                                            <th class="text-center">Tỷ lệ (%)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in (IEnumerable<dynamic>)report.LoiNhuan)
+                                        {
+                                            <tr>
+                                                <td>
+                                                    <strong>@item.TenDT</strong><br>
+                                                    <small class="text-muted">@item.MaDT</small>
+                                                </td>
+                                                <td class="text-end">@(((decimal)item.GiaNhap).ToString("C0"))</td>
+                                                <td class="text-end">@(((decimal)item.GiaBan).ToString("C0"))</td>
+                                                <td class="text-center">
+                                                    <span class="badge bg-info">@item.SoLuongBan</span>
+                                                </td>
+                                                <td class="text-end">
+                                                    <strong class="text-success">@(((decimal)item.DoanhThu).ToString("C0"))</strong>
+                                                </td>
+                                                <td class="text-end">
+                                                    <strong class="text-warning">@(((decimal)item.LoiNhuan).ToString("C0"))</strong>
+                                                </td>
+                                                <td class="text-center">
+                                                    <span class="badge bg-success">@item.TyLeLoiNhuan%</span>
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+            </div>
+        }
+
+        <!-- Báo cáo theo tháng (nếu được chọn) -->
+        @if (reportType == "monthly" && report.ThongKeTheoThang != null)
+        {
+            <div class="row mb-4">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h6>📅 Thống kê theo tháng</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Tháng/Năm</th>
+                                            <th class="text-center">Số đơn hàng</th>
+                                            <th class="text-end">Doanh thu</th>
+                                            <th class="text-end">TB/đơn hàng</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var item in (IEnumerable<dynamic>)report.ThongKeTheoThang)
+                                        {
+                                            <tr>
+                                                <td><strong>@item.Thang/@item.Nam</strong></td>
+                                                <td class="text-center">
+                                                    <span class="badge bg-primary">@item.SoDonHang</span>
+                                                </td>
+                                                <td class="text-end">
+                                                    <strong class="text-success">@(((decimal)item.DoanhThu).ToString("C0"))</strong>
+                                                </td>
+                                                <td class="text-end">@(((decimal)item.DoanhThuTrungBinh).ToString("C0"))</td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+        <!-- Bảng dữ liệu chi tiết -->
+        <div class="row">
+            <!-- Top sản phẩm bán chạy -->
+            <div class="col-lg-4 mb-4">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h6>📱 Top sản phẩm bán chạy</h6>
+                        @if (category != "all")
+                        {
+                            <span class="badge bg-info">@category.ToUpper()</span>
+                        }
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                            <table class="table table-sm">
+                                <thead class="sticky-top bg-light">
+                                    <tr>
+                                        <th>Sản phẩm</th>
+                                        <th class="text-center">Bán</th>
+                                        <th class="text-end">Doanh thu</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in (IEnumerable<dynamic>)report.TopSanPham)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <strong>@item.TenDT</strong><br>
+                                                <small class="text-muted">@item.MaDT</small>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge bg-primary">@item.SoLuongBan</span>
+                                            </td>
+                                            <td class="text-end">
+                                                <strong class="text-success">@(((decimal)item.DoanhThu).ToString("C0"))</strong>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                        <!-- Phân trang cho sản phẩm -->
+                        @if (report.Pagination != null && report.Pagination.TotalPages > 1)
+                        {
+                            <nav class="mt-3">
+                                <ul class="pagination pagination-sm justify-content-center">
+                                    @for (int i = 1; i <= Math.Min(report.Pagination.TotalPages, 5); i++)
+                                    {
+                                        <li class="page-item @(i == currentPage ? "active" : "")">
+                                            <a class="page-link" href="?fromDate=@(((DateTime)fromDate).ToString("yyyy-MM-dd"))&toDate=@(((DateTime)toDate).ToString("yyyy-MM-dd"))&reportType=@reportType&category=@category&page=@i">@i</a>
+                                        </li>
+                                    }
+                                </ul>
+                            </nav>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top khách hàng VIP -->
+            <div class="col-lg-4 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h6>👥 Top khách hàng VIP</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                            <table class="table table-sm">
+                                <thead class="sticky-top bg-light">
+                                    <tr>
+                                        <th>Khách hàng</th>
+                                        <th class="text-center">Đơn</th>
+                                        <th class="text-end">Tổng tiền</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in (IEnumerable<dynamic>)report.TopKhachHang)
+                                    {
+                                        <tr>
+                                            <td>
+                                                <strong>@item.HoTen</strong><br>
+                                                <small class="text-muted">@item.SoDT</small>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge bg-info">@item.SoDonHang</span>
+                                            </td>
+                                            <td class="text-end">
+                                                <strong class="text-success">@(((decimal)item.TongTien).ToString("C0"))</strong>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tình trạng tồn kho -->
+            <div class="col-lg-4 mb-4">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between">
+                        <h6>📦 Tình trạng tồn kho</h6>
+                        @if (report.TongQuan.SanPhamSapHet > 0)
+                        {
+                            <span class="badge bg-danger">@report.TongQuan.SanPhamSapHet sắp hết</span>
+                        }
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                            <table class="table table-sm">
+                                <thead class="sticky-top bg-light">
+                                    <tr>
+                                        <th>Sản phẩm</th>
+                                        <th class="text-center">Tồn</th>
+                                        <th class="text-end">Giá trị</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in (IEnumerable<dynamic>)report.ThongKeTonKho)
+                                    {
+                                        <tr class="@(item.SoLuongTon <= 5 ? "table-danger" : item.SoLuongTon <= 10 ? "table-warning" : "")">
+                                            <td>
+                                                <strong>@item.TenDT</strong><br>
+                                                <small class="text-muted">@item.MaDT</small>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge @(item.SoLuongTon <= 5 ? "bg-danger" : item.SoLuongTon <= 10 ? "bg-warning" : "bg-success")">
+                                                    @item.SoLuongTon
+                                                </span>
+                                            </td>
+                                            <td class="text-end">
+                                                <strong>@(((decimal)item.GiaTriTon).ToString("C0"))</strong>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Loading overlay -->
+    <div id="loadingOverlay" class="d-none position-fixed top-0 start-0 w-100 h-100" style="background: rgba(0,0,0,0.5); z-index: 9999;">
+        <div class="d-flex align-items-center justify-content-center h-100">
+            <div class="text-white text-center">
+                <div class="spinner-border" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <div class="mt-2">Đang tải dữ liệu...</div>
             </div>
         </div>
     </div>
@@ -203,70 +442,222 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <script>
-        // Doanh thu chart
-        const revenueData = @Html.Raw(Json.Serialize(((IEnumerable<dynamic>)report.DoanhThuTheoNgay).Select(x => new { 
-        label = ((DateTime)x.NgayDate).ToString("dd/MM"), 
-        value = x.DoanhThu 
-        })));
-        
-        const revenueCtx = document.getElementById('revenueChart').getContext('2d');
-        new Chart(revenueCtx, {
-            type: 'line',
-            data: {
-                labels: revenueData.map(d => d.label),
-                datasets: [{
-                    label: 'Doanh thu (VNĐ)',
-                    data: revenueData.map(d => d.value),
-                    borderColor: '#28a745',
-                    backgroundColor: 'rgba(40, 167, 69, 0.1)',
-                    tension: 0.4,
-                    fill: true
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                scales: {
-                    y: {
-                        ticks: {
-                            callback: function(value) {
-                                return new Intl.NumberFormat('vi-VN', {
-                                    style: 'currency',
-                                    currency: 'VND'
-                                }).format(value);
+        // Khởi tạo biểu đồ
+        function initCharts() {
+            // Kiểm tra xem có dữ liệu không
+            @if (report?.DoanhThuTheoNgay != null)
+            {
+                <text>
+                // Biểu đồ doanh thu
+                const revenueData = @Html.Raw(Json.Serialize(((IEnumerable<dynamic>)report.DoanhThuTheoNgay).Select(x => new { 
+                    label = ((DateTime)x.NgayDate).ToString("dd/MM"), 
+                    value = x.DoanhThu 
+                })));
+                
+                const revenueCtx = document.getElementById('revenueChart');
+                if (revenueCtx) {
+                    new Chart(revenueCtx, {
+                        type: 'line',
+                        data: {
+                            labels: revenueData.map(d => d.label),
+                            datasets: [{
+                                label: 'Doanh thu (VNĐ)',
+                                data: revenueData.map(d => d.value),
+                                borderColor: '#28a745',
+                                backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                                tension: 0.4,
+                                fill: true
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    display: true
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            return 'Doanh thu: ' + new Intl.NumberFormat('vi-VN', {
+                                                style: 'currency',
+                                                currency: 'VND'
+                                            }).format(context.parsed.y);
+                                        }
+                                    }
+                                }
+                            },
+                            scales: {
+                                y: {
+                                    ticks: {
+                                        callback: function(value) {
+                                            return new Intl.NumberFormat('vi-VN', {
+                                                style: 'currency',
+                                                currency: 'VND'
+                                            }).format(value);
+                                        }
+                                    }
+                                }
                             }
                         }
-                    }
+                    });
                 }
+                </text>
+            }
+
+            @if (report?.TopSanPham != null)
+            {
+                <text>
+                // Biểu đồ sản phẩm
+                const productData = @Html.Raw(Json.Serialize(((IEnumerable<dynamic>)report.TopSanPham).Take(5).Select(x => new { 
+                    label = x.TenDT, 
+                    value = x.SoLuongBan 
+                })));
+                
+                const productCtx = document.getElementById('productChart');
+                if (productCtx) {
+                    new Chart(productCtx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: productData.map(d => d.label),
+                            datasets: [{
+                                data: productData.map(d => d.value),
+                                backgroundColor: [
+                                    '#FF6384',
+                                    '#36A2EB', 
+                                    '#FFCE56',
+                                    '#4BC0C0',
+                                    '#9966FF'
+                                ]
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom'
+                                }
+                            }
+                        }
+                    });
+                }
+                </text>
+            }
+        }
+
+        // Khởi tạo khi trang load
+        document.addEventListener('DOMContentLoaded', function() {
+            initCharts();
+            
+            // Xử lý form submit với loading
+            document.getElementById('filterForm').addEventListener('submit', function() {
+                showLoading();
+            });
+        });
+
+        // Hiển thị loading
+        function showLoading() {
+            document.getElementById('loadingOverlay').classList.remove('d-none');
+        }
+
+        // Ẩn loading
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.add('d-none');
+        }
+
+        // Reset filters
+        function resetFilters() {
+            document.getElementById('fromDate').value = '@DateTime.Today.AddDays(-30).ToString("yyyy-MM-dd")';
+            document.getElementById('toDate').value = '@DateTime.Today.ToString("yyyy-MM-dd")';
+            document.getElementById('reportType').value = 'overview';
+            document.getElementById('category').value = 'all';
+        }
+
+        // Xuất báo cáo
+        function exportReport() {
+            const params = new URLSearchParams({
+                fromDate: document.getElementById('fromDate').value,
+                toDate: document.getElementById('toDate').value,
+                reportType: document.getElementById('reportType').value,
+                category: document.getElementById('category').value,
+                export: 'excel'
+            });
+            
+            window.open(`/Admin/BaoCaoChiTiet?${params.toString()}`, '_blank');
+        }
+
+        // Validation cho date inputs
+        document.getElementById('fromDate').addEventListener('change', function() {
+            const fromDate = new Date(this.value);
+            const toDate = new Date(document.getElementById('toDate').value);
+            
+            if (fromDate > toDate) {
+                alert('Ngày bắt đầu không thể lớn hơn ngày kết thúc!');
+                this.value = document.getElementById('toDate').value;
             }
         });
 
-        // Top products chart
-        const productData = @Html.Raw(Json.Serialize(((IEnumerable<dynamic>)report.TopSanPham).Take(5).Select(x => new { 
-            label = x.TenDT, 
-            value = x.SoLuongBan 
-        })));
-        
-        const productCtx = document.getElementById('productChart').getContext('2d');
-        new Chart(productCtx, {
-            type: 'doughnut',
-            data: {
-                labels: productData.map(d => d.label),
-                datasets: [{
-                    data: productData.map(d => d.value),
-                    backgroundColor: [
-                        '#FF6384',
-                        '#36A2EB',
-                        '#FFCE56',
-                        '#4BC0C0',
-                        '#9966FF'
-                    ]
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false
+        document.getElementById('toDate').addEventListener('change', function() {
+            const fromDate = new Date(document.getElementById('fromDate').value);
+            const toDate = new Date(this.value);
+            
+            if (toDate < fromDate) {
+                alert('Ngày kết thúc không thể nhỏ hơn ngày bắt đầu!');
+                this.value = document.getElementById('fromDate').value;
             }
         });
     </script>
+
+    <style>
+        .sticky-top {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .card {
+            transition: box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .badge {
+            font-size: 0.85em;
+        }
+
+        @@media (max-width: 768px) {
+            .col-md-3 {
+                margin-bottom: 15px;
+            }
+            
+            .card-body {
+                padding: 1rem;
+            }
+            
+            .table-responsive {
+                max-height: 300px;
+            }
+        }
+
+        .table-responsive::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+
+        .table-responsive::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        .table-responsive::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 3px;
+        }
+
+        .table-responsive::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+    </style>
 }

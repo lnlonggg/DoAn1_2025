@@ -16,8 +16,6 @@ namespace QL_CuaHangDienThoai.Controllers
         {
             _context = context;
         }
-
-        // Danh sách đơn hàng cho admin/nhân viên
         [Authorize(Policy = "StaffOnly")]
         public async Task<IActionResult> Index()
         {
@@ -30,7 +28,6 @@ namespace QL_CuaHangDienThoai.Controllers
             return View(donHangs);
         }
 
-        // Đơn hàng của khách hàng
         [Authorize(Policy = "CustomerOnly")]
         public async Task<IActionResult> MyOrders()
         {
@@ -53,7 +50,6 @@ namespace QL_CuaHangDienThoai.Controllers
             return View(donHangs);
         }
 
-        // Tạo đơn hàng mới
         [Authorize(Policy = "CustomerOnly")]
         [HttpGet]
         public async Task<IActionResult> Create(string productId)
@@ -82,7 +78,6 @@ namespace QL_CuaHangDienThoai.Controllers
             return View(model);
         }
 
-        // Xử lý tạo đơn hàng
         [Authorize(Policy = "CustomerOnly")]
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -111,24 +106,19 @@ namespace QL_CuaHangDienThoai.Controllers
                     return View(model);
                 }
 
-                // Tạo mã hóa đơn unique
+
                 var maHD = await GenerateUniqueOrderId();
 
-                // ❌ XÓA PHẦN NÀY - Khách hàng không thể là nhân viên
-                // Method Create này chỉ dành cho khách hàng đặt hàng trực tiếp
-                // Không cần lấy thông tin nhân viên
-
-                // Tạo hóa đơn (không có MaQTV vì khách tự đặt)
                 var hoaDon = new HoaDon
                 {
                     MaHD = maHD,
                     MaKH = khachHang.MaKH,
-                    MaQTV = null, // ← Khách hàng tự đặt = null
+                    MaQTV = null, 
                     NgayLap = DateTime.Now,
                     TongTien = model.SoLuong * product.DonGia
                 };
 
-                // Tạo chi tiết hóa đơn
+
                 var chiTiet = new ChiTietHoaDon
                 {
                     MaHD = maHD,
@@ -137,7 +127,6 @@ namespace QL_CuaHangDienThoai.Controllers
                     DonGia = product.DonGia
                 };
 
-                // Cập nhật tồn kho
                 product.SoLuongTon -= model.SoLuong;
 
                 _context.HoaDons.Add(hoaDon);
@@ -150,7 +139,6 @@ namespace QL_CuaHangDienThoai.Controllers
                 return RedirectToAction("OrderSuccess", new { id = maHD });
             }
 
-            // Reload thông tin sản phẩm nếu có lỗi
             var productInfo = await _context.DienThoais.FindAsync(model.MaDT);
             if (productInfo != null)
             {
@@ -163,7 +151,6 @@ namespace QL_CuaHangDienThoai.Controllers
         }
 
 
-        // Nhân viên tạo đơn hàng cho khách hàng
         [Authorize(Policy = "StaffOnly")]
         [HttpGet]
         public async Task<IActionResult> CreateForCustomer()
@@ -205,25 +192,22 @@ namespace QL_CuaHangDienThoai.Controllers
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-                // Lấy thông tin nhân viên hiện tại
                 var tenDangNhap = User.Identity.Name;
                 var nhanVien = await _context.QuanTriViens
                     .FirstOrDefaultAsync(q => q.TenDangNhap == tenDangNhap);
 
-                // Tạo mã hóa đơn
                 var maHD = await GenerateUniqueOrderId();
 
-                // Tạo hóa đơn
                 var hoaDon = new HoaDon
                 {
                     MaHD = maHD,
                     MaKH = maKH,
-                    MaQTV = nhanVien?.MaQTV, // ← Nhân viên tạo đơn
+                    MaQTV = nhanVien?.MaQTV,
                     NgayLap = DateTime.Now,
                     TongTien = soLuong * product.DonGia
                 };
 
-                // Tạo chi tiết hóa đơn
+
                 var chiTiet = new ChiTietHoaDon
                 {
                     MaHD = maHD,
@@ -232,7 +216,6 @@ namespace QL_CuaHangDienThoai.Controllers
                     DonGia = product.DonGia
                 };
 
-                // Cập nhật tồn kho
                 product.SoLuongTon -= soLuong;
 
                 _context.HoaDons.Add(hoaDon);
@@ -254,7 +237,6 @@ namespace QL_CuaHangDienThoai.Controllers
         }
 
 
-        // Trang thành công
         [Authorize(Policy = "CustomerOnly")]
         public async Task<IActionResult> OrderSuccess(string id)
         {
@@ -274,7 +256,6 @@ namespace QL_CuaHangDienThoai.Controllers
                 return NotFound();
             }
 
-            // Kiểm tra quyền truy cập
             var tenDangNhap = User.Identity.Name;
             if (hoaDon.KhachHang?.TenDangNhap != tenDangNhap)
             {
@@ -284,7 +265,6 @@ namespace QL_CuaHangDienThoai.Controllers
             return View(hoaDon);
         }
 
-        // Chi tiết đơn hàng
         public async Task<IActionResult> Details(string id)
         {
             if (string.IsNullOrEmpty(id))
@@ -304,7 +284,6 @@ namespace QL_CuaHangDienThoai.Controllers
                 return NotFound();
             }
 
-            // Kiểm tra quyền truy cập
             if (User.HasClaim("VaiTro", "khach"))
             {
                 var tenDangNhap = User.Identity.Name;
@@ -338,10 +317,9 @@ namespace QL_CuaHangDienThoai.Controllers
                     newId = $"HD{(lastNumber + 1):D3}";
                 }
 
-                // Kiểm tra xem ID này đã tồn tại chưa
+ 
                 exists = await _context.HoaDons.AnyAsync(h => h.MaHD == newId);
 
-                // Nếu đã tồn tại, thêm timestamp để tránh trùng
                 if (exists)
                 {
                     var timestamp = DateTime.Now.ToString("mmss");

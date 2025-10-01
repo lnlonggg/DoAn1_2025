@@ -1,4 +1,4 @@
-# 📱 Website Quản lý Cửa hàng Điện thoại  
+# Website Quản lý Cửa hàng Điện thoại  
 
 Dự án Đồ án 1 (2025) – Hệ thống Web Application giúp quản lý bán hàng điện thoại: sản phẩm, khách hàng, đơn hàng, phân quyền người dùng.  
 Tích hợp **thanh toán trực tuyến qua VNPAY**, giao diện thân thiện, dễ sử dụng.  
@@ -33,7 +33,7 @@ Integrated **VNPAY online payment gateway**, user-friendly and stable interface.
 ---
 
 ## Vai trò cá nhân | Personal Role  
-- **Trưởng nhóm / Team Leader**  
+- **Trưởng nhóm / Team Leader: Lý Ngọc Long**  
 - Phân tích yêu cầu, phân công công việc  
 - Phát triển Backend & tích hợp **VNPAY**  
 - Quản lý source code qua Git, đảm bảo tiến độ nhóm  

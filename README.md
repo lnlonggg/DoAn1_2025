@@ -51,14 +51,3 @@ Integrated **VNPAY online payment gateway**, user-friendly and stable interface.
 4. Run dự án bằng IIS Express hoặc:
 ```bash
  dotnet run
-
-## Kết quả | Results
-
-Website chạy ổn định, xử lý đơn hàng & thanh toán thành công qua VNPAY
-
-Giao diện mượt mà, thân thiện với người dùng
-
-Được đánh giá cao về tính thực tiễn và trải nghiệm người dùng
-
-
----
